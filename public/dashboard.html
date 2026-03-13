@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimeLooks — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0d0f12;
+    --sidebar:   #0b0d10;
+    --surface:   #141720;
+    --surface2:  #1b1f2e;
+    --surface3:  #222840;
+    --border:    #252a3a;
+    --border2:   #2e3450;
+    --accent:    #5865f2;
+    --accent2:   #4752c4;
+    --green:     #3ba55d;
+    --red:       #ed4245;
+    --yellow:    #faa81a;
+    --skull:     #c9a84c;
+    --text:      #e3e5e8;
+    --text2:     #8e9297;
+    --text3:     #5c6170;
+    --sidebar-w: 240px;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; }
+
+  /* ═══ LAYOUT ═══ */
+  .app { display: flex; min-height: 100vh; }
+
+  /* ═══ SIDEBAR ═══ */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 200;
+    overflow-y: auto;
+  }
+
+  .sidebar-top {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .server-chip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .server-chip:hover { background: var(--surface2); }
+  .server-chip .s-icon {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #9b59b6);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .server-chip .s-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .server-chip .s-arrow { color: var(--text3); font-size: 11px; }
+
+  .guild-select-wrap { margin-top: 8px; }
+  .guild-select-wrap select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    appearance: none;
+    outline: none;
+    cursor: pointer;
+  }
+
+  .nav { padding: 12px 8px; flex: 1; }
+
+  .nav-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    padding: 10px 8px 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--surface); color: var(--text); }
+  .nav-item.active { background: rgba(88,101,242,0.15); color: #fff; }
+  .nav-item.active .nav-icon { color: var(--accent); }
+  .nav-icon { font-size: 16px; width: 20px; text-align: center; flex-shrink: 0; }
+
+  .badge-new {
+    margin-left: auto;
+    background: var(--accent);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  .sidebar-footer {
+    padding: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .user-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+  .user-bar img { width: 32px; height: 32px; border-radius: 50%; }
+  .user-bar .uname { font-size: 13px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .logout-link { color: var(--text3); font-size: 16px; text-decoration: none; transition: color 0.15s; }
+  .logout-link:hover { color: var(--red); }
+
+  /* ═══ MAIN ═══ */
+  .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+  .topbar {
+    padding: 0 32px;
+    height: 56px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--sidebar);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .topbar-left h1 { font-size: 16px; font-weight: 600; }
+  .topbar-left .sep { color: var(--text3); }
+  .topbar-left .sub { font-size: 14px; color: var(--text2); }
+
+  .content { padding: 32px; flex: 1; }
+
+  /* ═══ PAGES ═══ */
+  .page { display: none; animation: fadeUp 0.25s ease forwards; }
+  .page.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ═══ HOME ═══ */
+  .welcome-banner {
+    margin-bottom: 32px;
+  }
+  .welcome-banner h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .welcome-banner h2 span { color: var(--accent); }
+  .welcome-banner p { font-size: 15px; color: var(--text2); margin-top: 4px; }
+
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  .module-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .module-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--card-accent, var(--accent));
+    transform: scaleX(0);
+    transition: transform 0.2s;
+    transform-origin: left;
+  }
+  .module-card:hover { background: var(--surface2); border-color: var(--border2); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .module-card:hover::before { transform: scaleX(1); }
+
+  .mc-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .mc-title { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .mc-desc { font-size: 13px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; }
+  .mc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .mc-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* stat row on home */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .stat-pill .sp-icon { font-size: 22px; }
+  .stat-pill .sp-val { font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
+  .stat-pill .sp-lbl { font-size: 12px; color: var(--text2); margin-top: 1px; }
+
+  /* ═══ SECTION HEADER ═══ */
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+  .section-header h2 { font-size: 20px; font-weight: 600; letter-spacing: -0.01em; }
+  .section-header p { font-size: 14px; color: var(--text2); margin-top: 3px; }
+
+  /* ═══ CARDS ═══ */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .card-header h3 { font-size: 14px; font-weight: 600; }
+  .card-header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .card-body { padding: 20px; }
+
+  /* ═══ FORMS ═══ */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 7px; }
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field input::placeholder { color: var(--text3); }
+
+  .row { display: flex; gap: 12px; align-items: flex-end; }
+  .row .field { flex: 1; margin-bottom: 0; }
+
+  /* ═══ BUTTONS ═══ */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-ghost { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--surface3); color: var(--text); }
+  .btn-danger { background: rgba(237,66,69,0.12); color: var(--red); border: 1px solid rgba(237,66,69,0.25); }
+  .btn-danger:hover { background: rgba(237,66,69,0.22); }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+
+  /* ═══ TABLE ═══ */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text3);
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  tbody td { padding: 13px 16px; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .tag-warn   { background: rgba(250,168,26,0.15); color: var(--yellow); }
+  .tag-mute   { background: rgba(237,66,69,0.15);  color: var(--red); }
+  .tag-gold   { background: rgba(201,168,76,0.15); color: var(--skull); }
+  .tag-green  { background: rgba(59,165,93,0.15);  color: var(--green); }
+
+  /* ═══ CHART ═══ */
+  .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
+  .bar-grp { flex: 1; display: flex; gap: 2px; align-items: flex-end; }
+  .bar { flex: 1; min-height: 3px; border-radius: 3px 3px 0 0; transition: opacity 0.15s; }
+  .bar:hover { opacity: 0.8; }
+  .bar-j { background: var(--green); }
+  .bar-l { background: var(--red); }
+  .chart-xlabels { display: flex; gap: 6px; margin-top: 8px; }
+  .chart-xlabels span { flex: 1; text-align: center; font-size: 11px; color: var(--text3); }
+  .chart-legend { display: flex; gap: 16px; margin-top: 12px; }
+  .chart-legend span { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ═══ LEADERBOARD ═══ */
+  .rank-1 { color: #ffd700; font-weight: 700; }
+  .rank-2 { color: #c0c0c0; font-weight: 700; }
+  .rank-3 { color: #cd7f32; font-weight: 700; }
+  .xp-mini { height: 4px; background: var(--surface3); border-radius: 2px; width: 100px; overflow: hidden; }
+  .xp-mini-fill { height: 100%; background: linear-gradient(90deg, var(--accent), #9b59b6); border-radius: 2px; }
+
+  /* ═══ SETTINGS GRID ═══ */
+  .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  /* ═══ TOAST ═══ */
+  #toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    font-size: 14px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    animation: slideIn 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .toast.ok  { border-left: 3px solid var(--green); }
+  .toast.err { border-left: 3px solid var(--red); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ═══ EMPTY / LOADING ═══ */
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
+  .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
+  .loading::after { content: '…'; }
+
+  /* ═══ INFO BOX ═══ */
+  .info {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(88,101,242,0.08);
+    border: 1px solid rgba(88,101,242,0.2);
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .info-icon { font-size: 16px; flex-shrink: 0; }
+
+  /* ═══ NO SERVER ═══ */
+  .no-server {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px;
+    gap: 12px;
+    color: var(--text3);
+  }
+  .no-server .icon { font-size: 40px; }
+  .no-server p { font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-top">
+      <div class="server-chip">
+        <div class="s-icon">💀</div>
+        <span class="s-name" id="sName">PrimeLooks</span>
+        <span class="s-arrow">▾</span>
+      </div>
+      <div class="guild-select-wrap">
+        <select id="guildSelect" onchange="onGuildChange()">
+          <option value="">Choose server…</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-label">General</div>
+      <div class="nav-item active" data-page="home" onclick="nav(this)">
+        <span class="nav-icon">🏠</span> Home
+      </div>
+
+      <div class="nav-label">Modules</div>
+      <div class="nav-item" data-page="automod" onclick="nav(this)">
+        <span class="nav-icon">🛡️</span> Auto Moderation
+      </div>
+      <div class="nav-item" data-page="warnings" onclick="nav(this)">
+        <span class="nav-icon">⚠️</span> Warnings
+      </div>
+      <div class="nav-item" data-page="skullboard" onclick="nav(this)">
+        <span class="nav-icon">💀</span> Skullboard
+      </div>
+      <div class="nav-item" data-page="leaderboard" onclick="nav(this)">
+        <span class="nav-icon">🏆</span> Leaderboard
+      </div>
+
+      <div class="nav-label">Config</div>
+      <div class="nav-item" data-page="settings" onclick="nav(this)">
+        <span class="nav-icon">⚙️</span> Settings
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="user-bar">
+        <img id="uAvatar" src="" alt="">
+        <div>
+          <div class="uname" id="uName">Loading…</div>
+        </div>
+        <a href="/auth/logout" class="logout-link" title="Logout">⏻</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1 id="pageTitle">Home</h1>
+        <span class="sep">›</span>
+        <span class="sub" id="pageSub">Dashboard</span>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- HOME -->
+      <div id="page-home" class="page active">
+        <div class="welcome-banner">
+          <h2>Welcome back, <span id="welcomeName">—</span></h2>
+          <p>Find commonly used dashboard pages below.</p>
+        </div>
+
+        <div class="stat-row" id="statRow">
+          <div class="stat-pill"><span class="sp-icon">🚫</span><div><div class="sp-val" id="st-censored">—</div><div class="sp-lbl">Censored Words</div></div></div>
+          <div class="stat-pill"><span class="sp-icon">💀</span><div><div class="sp-val" id="st-skull">—</div><div class="sp-lbl">Skull Threshold</div></div></div>
+          <div class="stat-pill"><span class="sp-icon">⚠️</span><div><div class="sp-val" id="st-warns">—</div><div class="sp-lbl">Active Warnings</div></div></div>
+          <div class="stat-pill"><span class="sp-icon">📈</span><div><div class="sp-val" id="st-xp">—</div><div class="sp-lbl">XP Per Message</div></div></div>
+        </div>
+
+        <div class="module-grid">
+          <div class="module-card" style="--card-accent:#ed4245" onclick="nav(document.querySelector('[data-page=automod]'))">
+            <span class="mc-icon">🛡️</span>
+            <div class="mc-title">Auto Moderation</div>
+            <div class="mc-desc">Manage censored words that trigger the auto-escalation system.</div>
+            <span class="mc-btn">Configure →</span>
+          </div>
+          <div class="module-card" style="--card-accent:#faa81a" onclick="nav(document.querySelector('[data-page=warnings]'))">
+            <span class="mc-icon">⚠️</span>
+            <div class="mc-title">Warnings</div>
+            <div class="mc-desc">View and clear member warning counts from auto-moderation.</div>
+            <span class="mc-btn">View warnings →</span>
+          </div>
+          <div class="module-card" style="--card-accent:#c9a84c" onclick="nav(document.querySelector('[data-page=skullboard]'))">
+            <span class="mc-icon">💀</span>
+            <div class="mc-title">Skullboard</div>
+            <div class="mc-desc">Configure the skull reaction threshold for the skullboard channel.</div>
+            <span class="mc-btn">Configure →</span>
+          </div>
+          <div class="module-card" style="--card-accent:#3ba55d" onclick="nav(document.querySelector('[data-page=leaderboard]'))">
+            <span class="mc-icon">🏆</span>
+            <div class="mc-title">Leaderboard</div>
+            <div class="mc-desc">Top 50 members ranked by XP and level.</div>
+            <span class="mc-btn">View leaderboard →</span>
+          </div>
+          <div class="module-card" style="--card-accent:#5865f2" onclick="nav(document.querySelector('[data-page=settings]'))">
+            <span class="mc-icon">⚙️</span>
+            <div class="mc-title">Settings</div>
+            <div class="mc-desc">Adjust XP rates, pic perms roles, spam limits, and more.</div>
+            <span class="mc-btn">Open settings →</span>
+          </div>
+          <div class="module-card" style="--card-accent:#9b59b6; cursor:default; opacity:0.5">
+            <span class="mc-icon">📊</span>
+            <div class="mc-title">Analytics <span style="font-size:11px;color:var(--text3);font-weight:400">(coming soon)</span></div>
+            <div class="mc-desc">Detailed message activity, join trends, and member insights.</div>
+            <span class="mc-btn">Coming soon</span>
+          </div>
+        </div>
+
+        <!-- 7-day chart -->
+        <div class="card" style="margin-top:24px" id="chartCard">
+          <div class="card-header">
+            <div>
+              <h3>7-Day Member Activity</h3>
+              <p>Joins and leaves over the past week</p>
+            </div>
+            <div class="chart-legend">
+              <span><span class="dot" style="background:var(--green)"></span>Joins</span>
+              <span><span class="dot" style="background:var(--red)"></span>Leaves</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-bars" id="chartBars"><div class="loading">Select a server to load</div></div>
+            <div class="chart-xlabels" id="chartLabels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AUTO MOD -->
+      <div id="page-automod" class="page">
+        <div class="section-header">
+          <div>
+            <h2>Auto Moderation</h2>
+            <p>Words that trigger the auto-escalation warning system</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><h3>Add Censored Word</h3><p>Detected messages are deleted and the user is warned</p></div></div>
+          <div class="card-body">
+            <div class="info"><span class="info-icon">ℹ️</span> Escalation order: Warn → Mute 5m → Mute 10m → Mute 2h + ping escalation user</div>
+            <div class="row">
+              <div class="field"><label>Word or Phrase</label><input type="text" id="cWord" placeholder="e.g. badword"></div>
+              <div class="field" style="max-width:140px"><label>Action</label>
+                <select id="cAction" onchange="toggleDur()">
+                  <option value="warn">Warn</option>
+                  <option value="mute">Mute</option>
+                </select>
+              </div>
+              <div class="field" style="max-width:140px" id="durWrap">
+                <label>Duration (min)</label>
+                <input type="number" id="cDur" placeholder="10" min="1">
+              </div>
+              <button class="btn btn-primary" onclick="addWord()">Add Word</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><h3>Active Filters</h3><p id="censorCount">Loading…</p></div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Word / Phrase</th><th>Action</th><th>Duration</th><th></th></tr></thead>
+              <tbody id="cTbody"><tr><td colspan="4" class="loading">Loading</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- WARNINGS -->
+      <div id="page-warnings" class="page">
+        <div class="section-header">
+          <div><h2>Member Warnings</h2><p>Auto-moderation warning counts — clear individually</p></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>User ID</th><th>Warnings</th><th>Next Action</th><th></th></tr></thead>
+              <tbody id="wTbody"><tr><td colspan="4" class="loading">Loading</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SKULLBOARD -->
+      <div id="page-skullboard" class="page">
+        <div class="section-header">
+          <div><h2>Skullboard</h2><p>Configure the skull reaction threshold</p></div>
+          <button class="btn btn-primary" onclick="saveSkull()">Save Changes</button>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><h3>Skullboard Settings</h3></div></div>
+          <div class="card-body">
+            <div class="info"><span class="info-icon">💀</span> When a message receives this many 💀 reactions it gets posted to #skullboard. The count updates automatically as more people react.</div>
+            <div class="settings-grid">
+              <div class="field">
+                <label>Skull Reactions Required</label>
+                <input type="number" id="sk_threshold" min="1" max="50" placeholder="5">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div id="page-leaderboard" class="page">
+        <div class="section-header">
+          <div><h2>XP Leaderboard</h2><p>Top 50 members by experience points</p></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Rank</th><th>User ID</th><th>Level</th><th>XP</th><th>Progress</th></tr></thead>
+              <tbody id="lbTbody"><tr><td colspan="5" class="loading">Loading</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page">
+        <div class="section-header">
+          <div><h2>Settings</h2><p>Configure bot behaviour — some require a restart</p></div>
+          <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+        </div>
+
+        <div class="settings-grid">
+          <div class="card">
+            <div class="card-header"><div><h3>🛡️ Pic Perms</h3></div></div>
+            <div class="card-body">
+              <div class="field"><label>Pic Perms Role Name</label><input type="text" id="s_picPermsRole" placeholder="𝑷𝒍𝒆𝒃𝒆𝒊𝒖𝒔"></div>
+              <div class="field"><label>Exempt Role (no pic perms ever)</label><input type="text" id="s_picPermsExempt" placeholder="𝑺𝒆𝒓𝒗𝒖𝒔"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div><h3>📈 XP & Leveling</h3></div></div>
+            <div class="card-body">
+              <div class="field"><label>XP Per Message</label><input type="number" id="s_xpPerMessage" min="1"></div>
+              <div class="field"><label>XP Cooldown (ms)</label><input type="number" id="s_cooldownMs" min="0"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div><h3>🤖 Anti-Spam</h3></div></div>
+            <div class="card-body">
+              <div class="field"><label>Spam Message Limit</label><input type="number" id="s_spamLimit" min="2"></div>
+              <div class="field"><label>Escalation Alert Username</label><input type="text" id="s_escalationUser" placeholder="returningchad"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div><h3>💀 Skullboard</h3></div></div>
+            <div class="card-body">
+              <div class="field"><label>Skull Threshold</label><input type="number" id="s_skullThreshold" min="1" max="50"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let guildId = null;
+
+const PAGE_INFO = {
+  home:        ['Home',         'Dashboard'],
+  automod:     ['Auto Moderation', 'Censored words & escalation'],
+  warnings:    ['Warnings',     'Member warning counts'],
+  skullboard:  ['Skullboard',   'Skull reaction settings'],
+  leaderboard: ['Leaderboard',  'XP rankings'],
+  settings:    ['Settings',     'Bot configuration'],
+};
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+(async () => {
+  const res = await fetch('/api/me');
+  if (!res.ok) { location.href = '/'; return; }
+  const { user, guilds } = await res.json();
+
+  document.getElementById('uName').textContent     = user.username;
+  document.getElementById('welcomeName').textContent = user.username;
+  const av = user.avatar
+    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+  document.getElementById('uAvatar').src = av;
+
+  const sel = document.getElementById('guildSelect');
+  guilds
+    .filter(g => (parseInt(g.permissions) & 0x8) === 0x8)
+    .forEach(g => {
+      const o = document.createElement('option');
+      o.value = g.id; o.textContent = g.name;
+      sel.appendChild(o);
+    });
+})();
+
+// ═══════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════
+function nav(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  el.classList.add('active');
+  const page = el.dataset.page;
+  document.getElementById(`page-${page}`).classList.add('active');
+  const [t, s] = PAGE_INFO[page] || [page, ''];
+  document.getElementById('pageTitle').textContent = t;
+  document.getElementById('pageSub').textContent   = s;
+  loadPage(page);
+}
+
+function onGuildChange() {
+  guildId = document.getElementById('guildSelect').value || null;
+  const name = document.getElementById('guildSelect').selectedOptions[0]?.text || 'PrimeLooks';
+  document.getElementById('sName').textContent = name;
+  loadPage(document.querySelector('.nav-item.active')?.dataset.page || 'home');
+}
+
+function loadPage(p) {
+  if (p === 'home')        loadHome();
+  if (p === 'automod')     loadAutomod();
+  if (p === 'warnings')    loadWarnings();
+  if (p === 'skullboard')  loadSkullboard();
+  if (p === 'leaderboard') loadLeaderboard();
+  if (p === 'settings')    loadSettings();
+}
+
+// ═══════════════════════════════════════
+// HOME
+// ═══════════════════════════════════════
+async function loadHome() {
+  if (!guildId) return;
+  const [cWords, settings, warnings] = await Promise.all([
+    api('/api/censored'), api('/api/settings'), api(`/api/warnings?guildId=${guildId}`)
+  ]);
+  document.getElementById('st-censored').textContent = Array.isArray(cWords) ? cWords.length : '—';
+  document.getElementById('st-skull').textContent    = settings?.skullThreshold ?? '—';
+  document.getElementById('st-warns').textContent    = Array.isArray(warnings) ? warnings.length : '—';
+  document.getElementById('st-xp').textContent       = settings?.xpPerMessage ?? '—';
+
+  const stats = await api(`/api/stats?guildId=${guildId}`);
+  if (stats) renderChart(stats);
+}
+
+function renderChart(rows) {
+  const bars   = document.getElementById('chartBars');
+  const labels = document.getElementById('chartLabels');
+  bars.innerHTML = labels.innerHTML = '';
+  const max = Math.max(1, ...rows.map(r => Math.max(r.joins, r.leaves)));
+  rows.forEach(r => {
+    const [,mm,dd] = r.date.split('-');
+    const jh = Math.max(3, Math.round((r.joins  / max) * 110));
+    const lh = Math.max(3, Math.round((r.leaves / max) * 110));
+    bars.innerHTML += `<div class="bar-grp">
+      <div class="bar bar-j" style="height:${jh}px" title="${r.joins} joins"></div>
+      <div class="bar bar-l" style="height:${lh}px" title="${r.leaves} leaves"></div>
+    </div>`;
+    labels.innerHTML += `<span>${mm}/${dd}</span>`;
+  });
+}
+
+// ═══════════════════════════════════════
+// AUTO MOD
+// ═══════════════════════════════════════
+function toggleDur() {
+  document.getElementById('durWrap').style.display =
+    document.getElementById('cAction').value === 'mute' ? '' : 'none';
+}
+toggleDur();
+
+async function loadAutomod() {
+  const words = await api('/api/censored') || [];
+  renderCensor(words);
+}
+
+function renderCensor(words) {
+  document.getElementById('censorCount').textContent = `${words.length} active filter${words.length !== 1 ? 's' : ''}`;
+  const tb = document.getElementById('cTbody');
+  if (!words.length) { tb.innerHTML = `<tr><td colspan="4" class="empty">No censored words yet. Add one above.</td></tr>`; return; }
+  tb.innerHTML = words.map(w => `
+    <tr>
+      <td style="color:var(--text);font-weight:500">${esc(w.word)}</td>
+      <td><span class="tag tag-${w.action}">${w.action}</span></td>
+      <td>${w.action === 'mute' && w.duration ? (w.duration/60000)+'m' : '—'}</td>
+      <td style="text-align:right"><button class="btn btn-danger btn-sm" onclick="removeWord('${esc(w.word)}')">Remove</button></td>
+    </tr>`).join('');
+}
+
+async function addWord() {
+  const word   = document.getElementById('cWord').value.trim();
+  const action = document.getElementById('cAction').value;
+  const dur    = parseInt(document.getElementById('cDur').value) || null;
+  if (!word) { toast('Enter a word first.', true); return; }
+  const r = await api('/api/censored/add', 'POST', { word, action, duration: dur });
+  if (r?.error) { toast(r.error, true); return; }
+  document.getElementById('cWord').value = '';
+  renderCensor(r.words);
+  toast(`"${word}" added ✓`);
+}
+
+async function removeWord(word) {
+  const r = await api('/api/censored/remove', 'POST', { word });
+  if (r?.error) { toast(r.error, true); return; }
+  renderCensor(r.words);
+  toast(`"${word}" removed`);
+}
+
+// ═══════════════════════════════════════
+// WARNINGS
+// ═══════════════════════════════════════
+async function loadWarnings() {
+  if (!guildId) { document.getElementById('wTbody').innerHTML = `<tr><td colspan="4" class="empty">Select a server first.</td></tr>`; return; }
+  const data = await api(`/api/warnings?guildId=${guildId}`) || [];
+  const tb = document.getElementById('wTbody');
+  if (!data.length) { tb.innerHTML = `<tr><td colspan="4" class="empty">No active warnings 🎉</td></tr>`; return; }
+  const next = n => n <= 1 ? 'Warn' : n === 2 ? 'Mute 5m' : n === 3 ? 'Mute 10m' : 'Mute 2h';
+  tb.innerHTML = data.map(w => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:13px">${esc(w.userId)}</td>
+      <td><span class="tag tag-warn">${w.warnings} warn${w.warnings!==1?'s':''}</span></td>
+      <td style="color:var(--text3)">${next(w.warnings)}</td>
+      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="clearWarn('${esc(w.userId)}')">Clear</button></td>
+    </tr>`).join('');
+}
+
+async function clearWarn(userId) {
+  if (!guildId) return;
+  await api('/api/warnings/clear', 'POST', { guildId, userId });
+  toast('Warnings cleared ✓');
+  loadWarnings();
+}
+
+// ═══════════════════════════════════════
+// SKULLBOARD
+// ═══════════════════════════════════════
+async function loadSkullboard() {
+  const s = await api('/api/settings') || {};
+  document.getElementById('sk_threshold').value = s.skullThreshold ?? 5;
+}
+
+async function saveSkull() {
+  const t = parseInt(document.getElementById('sk_threshold').value);
+  if (!t || t < 1) { toast('Enter a valid number', true); return; }
+  const r = await api('/api/settings', 'POST', { skullThreshold: t });
+  if (r?.success) toast('Saved ✓');
+  else toast('Save failed', true);
+}
+
+// ═══════════════════════════════════════
+// LEADERBOARD
+// ═══════════════════════════════════════
+async function loadLeaderboard() {
+  if (!guildId) { document.getElementById('lbTbody').innerHTML = `<tr><td colspan="5" class="empty">Select a server first.</td></tr>`; return; }
+  const data = await api(`/api/leaderboard?guildId=${guildId}`) || [];
+  const tb = document.getElementById('lbTbody');
+  if (!data.length) { tb.innerHTML = `<tr><td colspan="5" class="empty">No XP data yet.</td></tr>`; return; }
+  const maxXP = data[0]?.xp || 1;
+  tb.innerHTML = data.map(e => {
+    const rc = e.rank===1?'rank-1':e.rank===2?'rank-2':e.rank===3?'rank-3':'';
+    const pct = Math.round((e.xp/maxXP)*100);
+    return `<tr>
+      <td class="${rc}">#${e.rank}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:13px">${esc(e.userId)}</td>
+      <td><span class="tag tag-gold">Lvl ${e.level}</span></td>
+      <td>${e.xp.toLocaleString()}</td>
+      <td><div class="xp-mini"><div class="xp-mini-fill" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════
+async function loadSettings() {
+  const s = await api('/api/settings') || {};
+  document.getElementById('s_picPermsRole').value   = s.picPermsRole    ?? '';
+  document.getElementById('s_picPermsExempt').value = s.picPermsExempt  ?? '';
+  document.getElementById('s_xpPerMessage').value   = s.xpPerMessage    ?? 10;
+  document.getElementById('s_cooldownMs').value     = s.cooldownMs      ?? 5000;
+  document.getElementById('s_spamLimit').value      = s.spamLimit       ?? 5;
+  document.getElementById('s_escalationUser').value = s.escalationUser  ?? '';
+  document.getElementById('s_skullThreshold').value = s.skullThreshold  ?? 5;
+}
+
+async function saveSettings() {
+  const body = {
+    picPermsRole:   document.getElementById('s_picPermsRole').value.trim(),
+    picPermsExempt: document.getElementById('s_picPermsExempt').value.trim(),
+    xpPerMessage:   parseInt(document.getElementById('s_xpPerMessage').value),
+    cooldownMs:     parseInt(document.getElementById('s_cooldownMs').value),
+    spamLimit:      parseInt(document.getElementById('s_spamLimit').value),
+    escalationUser: document.getElementById('s_escalationUser').value.trim(),
+    skullThreshold: parseInt(document.getElementById('s_skullThreshold').value),
+  };
+  const r = await api('/api/settings', 'POST', body);
+  if (r?.success) toast('Settings saved ✓');
+  else toast('Save failed', true);
+}
+
+// ═══════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════
+async function api(url, method='GET', body=null) {
+  try {
+    const r = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      ...(body ? { body: JSON.stringify(body) } : {})
+    });
+    return await r.json();
+  } catch { return null; }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function toast(msg, err=false) {
+  const t = document.createElement('div');
+  t.className = `toast ${err?'err':'ok'}`;
+  t.textContent = msg;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+</script>
+</body>
+</html>
