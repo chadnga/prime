@@ -19,7 +19,7 @@ const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
 // ── Discord OAuth2 ───────────────────────────────────────────────
 const CLIENT_ID      = process.env.CLIENT_ID;      // your bot's application ID
 const CLIENT_SECRET  = process.env.CLIENT_SECRET;  // from Discord Developer Portal
-const REDIRECT_URI   = process.env.REDIRECT_URI || `http://localhost:${PORT}/auth/callback`;
+const REDIRECT_URI   = `http://localhost:${PORT}/auth/callback`;
 const DISCORD_API    = 'https://discord.com/api/v10';
 
 // ── DB keys (must match index.js) ────────────────────────────────
@@ -227,8 +227,8 @@ app.post('/api/warnings/clear', requireAuth, async (req, res) => {
   res.json({ success: true });
 });
 
-// ── Catch-all → serve index.html ─────────────────────────────────
-app.get('*', (req, res) => {
+// Catch-all → serve index.html
+app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
