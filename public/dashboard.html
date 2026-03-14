@@ -1200,7 +1200,7 @@
 
       <!-- BOARD MODAL -->
       <div id="boardModal" style="display:none">
-        <div class="modal-overlay" onclick="closeBoardModal(event)">
+        <div class="modal-overlay" onclick="closeBoardModal()">
           <div class="modal" style="width:520px" onclick="event.stopPropagation()">
             <div class="modal-header">
               <div>
@@ -1234,23 +1234,11 @@
 
               <div class="field">
                 <label>Post to Channel(s)</label>
-                <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Select one or more channels</div>
-
-                <!-- selected tags -->
-                <div id="b_selectedChannels" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px;min-height:0"></div>
-
-                <!-- dropdown trigger -->
-                <div id="b_channelDropdownWrap" style="position:relative">
-                  <div id="b_channelTrigger" onclick="toggleChannelDropdown()"
-                    style="display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;cursor:pointer;font-size:14px;color:var(--text3)">
-                    <span id="b_triggerLabel">Select channels…</span>
-                    <span id="b_triggerArrow" style="font-size:11px;transition:transform 0.2s">▾</span>
-                  </div>
-                  <div id="b_channelDropdown"
-                    style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:500;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4);max-height:200px;overflow-y:auto;scrollbar-width:thin">
-                    <div id="b_channelList"><div class="loading" style="padding:12px">Loading…</div></div>
-                  </div>
+                <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Click to select channels</div>
+                <div id="b_channelList" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;max-height:160px;overflow-y:auto;scrollbar-width:thin">
+                  <div class="loading" style="padding:12px">Loading channels…</div>
                 </div>
+                <div id="b_selectedChannels" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
               </div>
 
               <div class="field">
@@ -1768,6 +1756,12 @@ function renderBoards() {
 
 let selectedBoardChannels = [];
 
+function closeBoardModal() {
+  document.getElementById('boardModal').style.display = 'none';
+  editingBoard = null;
+  selectedBoardChannels = [];
+}
+
 async function openBoardModal(idx) {
   editingBoard = idx !== undefined ? idx : null;
   const b = idx !== undefined ? boards[idx] : null;
@@ -1807,27 +1801,6 @@ function renderChannelPicker(channels) {
   renderSelectedChannelTags();
 }
 
-let channelDropdownOpen = false;
-
-function toggleChannelDropdown() {
-  const dd    = document.getElementById('b_channelDropdown');
-  const arrow = document.getElementById('b_triggerArrow');
-  channelDropdownOpen = !channelDropdownOpen;
-  dd.style.display = channelDropdownOpen ? 'block' : 'none';
-  arrow.style.transform = channelDropdownOpen ? 'rotate(180deg)' : '';
-}
-
-document.addEventListener('click', function(e) {
-  if (!channelDropdownOpen) return;
-  const wrap = document.getElementById('b_channelDropdownWrap');
-  if (wrap && !wrap.contains(e.target)) {
-    channelDropdownOpen = false;
-    const dd = document.getElementById('b_channelDropdown');
-    const arrow = document.getElementById('b_triggerArrow');
-    if (dd) dd.style.display = 'none';
-    if (arrow) arrow.style.transform = '';
-  }
-});
 
 function toggleBoardChannel(name, el) {
   const idx = selectedBoardChannels.indexOf(name);
