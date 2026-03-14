@@ -1362,8 +1362,18 @@
           <div class="card">
             <div class="card-header"><div><h3>🛡️ Pic Perms</h3></div></div>
             <div class="card-body">
-              <div class="field"><label>Pic Perms Role Name</label><input type="text" id="s_picPermsRole" placeholder="𝑷𝒍𝒆𝒃𝒆𝒊𝒖𝒔"></div>
-              <div class="field"><label>Exempt Role (no pic perms ever)</label><input type="text" id="s_picPermsExempt" placeholder="𝑺𝒆𝒓𝒗𝒖𝒔"></div>
+              <div class="field">
+                <label>Pic Perms Role</label>
+                <select id="s_picPermsRole" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:8px;outline:none;width:100%">
+                  <option value="">Loading roles…</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Exempt Role (no pic perms ever)</label>
+                <select id="s_picPermsExempt" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;padding:9px 12px;border-radius:8px;outline:none;width:100%">
+                  <option value="">Loading roles…</option>
+                </select>
+              </div>
             </div>
           </div>
 
@@ -1900,20 +1910,35 @@ async function loadLeaderboard() {
 // SETTINGS
 // ═══════════════════════════════════════
 async function loadSettings() {
-  const s = await api('/api/settings') || {};
-  document.getElementById('s_picPermsRole').value   = s.picPermsRole    ?? '';
-  document.getElementById('s_picPermsExempt').value = s.picPermsExempt  ?? '';
-  document.getElementById('s_xpPerMessage').value   = s.xpPerMessage    ?? 10;
-  document.getElementById('s_cooldownMs').value     = s.cooldownMs      ?? 5000;
-  document.getElementById('s_spamLimit').value      = s.spamLimit       ?? 5;
-  document.getElementById('s_escalationUser').value = s.escalationUser  ?? '';
-  document.getElementById('s_skullThreshold').value = s.skullThreshold  ?? 5;
+  const [s, roles] = await Promise.all([
+    api('/api/settings'),
+    guildId ? api(`/api/roles?guildId=${guildId}`) : Promise.resolve([])
+  ]);
+  const settings = s || {};
+  const roleList = roles || [];
+
+  // Populate role dropdowns
+  const roleOptions = `<option value="">— None —</option>` +
+    roleList.map(r => `<option value="${esc(r.name)}">${esc(r.name)}</option>`).join('');
+
+  const picRoleSel    = document.getElementById('s_picPermsRole');
+  const exemptRoleSel = document.getElementById('s_picPermsExempt');
+  picRoleSel.innerHTML    = roleOptions;
+  exemptRoleSel.innerHTML = roleOptions;
+  picRoleSel.value    = settings.picPermsRole    || '';
+  exemptRoleSel.value = settings.picPermsExempt  || '';
+
+  document.getElementById('s_xpPerMessage').value   = settings.xpPerMessage    ?? 10;
+  document.getElementById('s_cooldownMs').value     = settings.cooldownMs      ?? 5000;
+  document.getElementById('s_spamLimit').value      = settings.spamLimit       ?? 5;
+  document.getElementById('s_escalationUser').value = settings.escalationUser  ?? '';
+  document.getElementById('s_skullThreshold').value = settings.skullThreshold  ?? 5;
 }
 
 async function saveSettings() {
   const body = {
-    picPermsRole:   document.getElementById('s_picPermsRole').value.trim(),
-    picPermsExempt: document.getElementById('s_picPermsExempt').value.trim(),
+    picPermsRole:   document.getElementById('s_picPermsRole').value,
+    picPermsExempt: document.getElementById('s_picPermsExempt').value,
     xpPerMessage:   parseInt(document.getElementById('s_xpPerMessage').value),
     cooldownMs:     parseInt(document.getElementById('s_cooldownMs').value),
     spamLimit:      parseInt(document.getElementById('s_spamLimit').value),
