@@ -1,67 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PrimeLooks | Control Room</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrimeLooks — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d0f12;
+    --surface:  #141720;
+    --surface2: #1b1f2e;
+    --border:   #252a3a;
+    --accent:   #5865f2;
+    --accent2:  #4752c4;
+    --text:     #e3e5e8;
+    --text2:    #8e9297;
+    --skull:    #c9a84c;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* animated background blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.12;
+    pointer-events: none;
+    animation: drift 12s ease-in-out infinite alternate;
+  }
+  .blob1 { width: 500px; height: 500px; background: var(--accent); top: -100px; left: -100px; }
+  .blob2 { width: 400px; height: 400px; background: #c084fc; bottom: -80px; right: -80px; animation-delay: -4s; }
+  .blob3 { width: 300px; height: 300px; background: var(--skull); top: 40%; left: 50%; animation-delay: -8s; opacity: 0.07; }
+
+  @keyframes drift {
+    from { transform: translate(0, 0) scale(1); }
+    to   { transform: translate(30px, 20px) scale(1.05); }
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 52px;
+    width: 420px;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.5);
+    animation: rise 0.5s cubic-bezier(0.16,1,0.3,1) forwards;
+  }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .logo-ring {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #9b59b6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 32px;
+    box-shadow: 0 0 0 6px rgba(88,101,242,0.15);
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-bottom: 36px;
+    line-height: 1.5;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(88,101,242,0.35);
+  }
+  .login-btn:hover {
+    background: var(--accent2);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 28px rgba(88,101,242,0.45);
+  }
+  .login-btn:active { transform: translateY(0); }
+
+  .discord-icon { width: 22px; height: 22px; flex-shrink: 0; }
+
+  .features {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 28px;
+  }
+
+  .feature {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    text-align: left;
+  }
+  .feature .icon { font-size: 18px; margin-bottom: 6px; display: block; }
+  .feature .name { font-size: 12px; font-weight: 500; color: var(--text2); }
+
+  .error {
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: rgba(237,66,69,0.1);
+    border: 1px solid rgba(237,66,69,0.3);
+    border-radius: 8px;
+    font-size: 13px;
+    color: #f04747;
+    display: none;
+  }
+</style>
 </head>
 <body>
-  <div class="app">
-    <aside class="sidebar">
-      <div class="sidebar-header">
-        <div class="logo">
-          <span class="logo-icon">&#128128;</span>
-          <span class="logo-text">PrimeLooks</span>
-        </div>
-      </div>
-      <nav class="nav">
-        <a href="#" class="nav-item active" data-page="overview">
-          <span class="nav-icon">&#128202;</span>
-          <span>Overview</span>
-        </a>
-        <a href="#" class="nav-item" data-page="features">
-          <span class="nav-icon">&#10024;</span>
-          <span>Features</span>
-        </a>
-        <a href="#" class="nav-item" data-page="moderation">
-          <span class="nav-icon">&#128737;</span>
-          <span>Moderation</span>
-        </a>
-        <a href="#" class="nav-item" data-page="xp">
-          <span class="nav-icon">&#11088;</span>
-          <span>XP & Leaderboard</span>
-        </a>
-        <a href="#" class="nav-item" data-page="settings">
-          <span class="nav-icon">&#9881;</span>
-          <span>Settings</span>
-        </a>
-      </nav>
-      <div class="sidebar-footer">
-        <div class="status-indicator" id="statusIndicator">
-          <span class="status-dot"></span>
-          <span>Connecting...</span>
-        </div>
-      </div>
-    </aside>
-    <main class="main">
-      <header class="header">
-        <h1 class="page-title" id="pageTitle">Overview</h1>
-        <div class="header-actions">
-          <select id="guildSelect" class="guild-select">
-            <option value="">Select server...</option>
-          </select>
-        </div>
-      </header>
-      <div class="content" id="content">
-        <div class="loading" id="loading">Loading...</div>
-        <div class="page-content" id="pageContent" style="display:none;"></div>
-      </div>
-    </main>
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<div class="card">
+  <div class="logo-ring">💀</div>
+  <h1>PrimeLooks Dashboard</h1>
+  <p class="sub">Sign in with Discord to manage your server settings, moderation, and more.</p>
+
+  <a href="/auth/login" class="login-btn">
+    <svg class="discord-icon" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.033.055a19.9 19.9 0 0 0 5.993 3.03.077.077 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/>
+    </svg>
+    Continue with Discord
+  </a>
+
+  <div class="divider"></div>
+
+  <div class="features">
+    <div class="feature"><span class="icon">🚫</span><span class="name">Auto Moderation</span></div>
+    <div class="feature"><span class="icon">📈</span><span class="name">XP Leaderboard</span></div>
+    <div class="feature"><span class="icon">💀</span><span class="name">Skullboard</span></div>
+    <div class="feature"><span class="icon">⚙️</span><span class="name">Bot Settings</span></div>
   </div>
-  <script src="js/app.js"></script>
+
+  <div class="error" id="errorMsg"></div>
+</div>
+
+<script>
+  const p = new URLSearchParams(location.search);
+  if (p.get('error')) {
+    const el = document.getElementById('errorMsg');
+    el.style.display = 'block';
+    el.textContent = p.get('error') === 'oauth_failed'
+      ? 'Login failed. Check your CLIENT_ID and CLIENT_SECRET in .env'
+      : 'Something went wrong. Please try again.';
+  }
+  fetch('/api/me').then(r => { if (r.ok) location.href = '/dashboard.html'; });
+</script>
 </body>
 </html>

@@ -397,6 +397,49 @@
     to   { opacity: 1; transform: translateX(0); }
   }
 
+  /* ═══ TOGGLE ROWS ═══ */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .toggle-row:hover { background: rgba(255,255,255,0.02); }
+  .tr-text { flex: 1; }
+  .tr-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .tr-desc  { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+  .toggle {
+    width: 44px;
+    height: 24px;
+    border-radius: 12px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .toggle[data-on="true"] {
+    background: var(--green);
+    border-color: var(--green);
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
+
   /* ═══ EMPTY / LOADING ═══ */
   .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
   .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
@@ -470,6 +513,9 @@
       </div>
 
       <div class="nav-label">Config</div>
+      <div class="nav-item" data-page="commands" onclick="nav(this)">
+        <span class="nav-icon">🔧</span> Commands
+      </div>
       <div class="nav-item" data-page="settings" onclick="nav(this)">
         <span class="nav-icon">⚙️</span> Settings
       </div>
@@ -661,6 +707,71 @@
         </div>
       </div>
 
+      <!-- COMMANDS -->
+      <div id="page-commands" class="page">
+        <div class="section-header">
+          <div><h2>Commands</h2><p>Configure bot response behaviour for error messages</p></div>
+          <button class="btn btn-primary" onclick="saveCommands()">Save Changes</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div><h3>Error Messages</h3><p>Control which error responses the bot sends to users</p></div></div>
+          <div class="card-body" style="padding:0">
+
+            <div class="toggle-row" id="tr-cmdNotFound">
+              <div class="tr-text">
+                <div class="tr-title">Command not found</div>
+                <div class="tr-desc">Sent when an executed command doesn't exist.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="cmdNotFound" data-on="true">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row" id="tr-wrongUsage">
+              <div class="tr-text">
+                <div class="tr-title">Wrong command usage</div>
+                <div class="tr-desc">Sent when an existing command is used incorrectly.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="wrongUsage" data-on="true">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row" id="tr-noPermissions">
+              <div class="tr-text">
+                <div class="tr-title">No command permissions</div>
+                <div class="tr-desc">Sent when an unpermitted user is executing an existing command. If disabled, "Command not found" will be sent instead.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="noPermissions" data-on="true">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row" id="tr-disabledInChannel">
+              <div class="tr-text">
+                <div class="tr-title">Disabled in channel</div>
+                <div class="tr-desc">Sent when an existing command is executed in a channel where it's disabled.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="disabledInChannel" data-on="false">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+
+            <div class="toggle-row" style="border-bottom:none" id="tr-onCooldown">
+              <div class="tr-text">
+                <div class="tr-title">Command on cooldown</div>
+                <div class="tr-desc">Sent when an existing command is executed while the user is on cooldown.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="onCooldown" data-on="true">
+                <div class="toggle-thumb"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
       <!-- SETTINGS -->
       <div id="page-settings" class="page">
         <div class="section-header">
@@ -720,7 +831,7 @@ const PAGE_INFO = {
   warnings:    ['Warnings',     'Member warning counts'],
   skullboard:  ['Skullboard',   'Skull reaction settings'],
   leaderboard: ['Leaderboard',  'XP rankings'],
-  settings:    ['Settings',     'Bot configuration'],
+  commands:    ['Commands',     'Error message settings'],
 };
 
 // ═══════════════════════════════════════
@@ -776,6 +887,7 @@ function loadPage(p) {
   if (p === 'warnings')    loadWarnings();
   if (p === 'skullboard')  loadSkullboard();
   if (p === 'leaderboard') loadLeaderboard();
+  if (p === 'commands')    loadCommands();
   if (p === 'settings')    loadSettings();
 }
 
@@ -948,6 +1060,39 @@ async function saveSettings() {
   };
   const r = await api('/api/settings', 'POST', body);
   if (r?.success) toast('Settings saved ✓');
+  else toast('Save failed', true);
+}
+
+// ═══════════════════════════════════════
+// COMMANDS
+// ═══════════════════════════════════════
+const COMMANDS_KEY = 'dashboard_commands';
+
+async function loadCommands() {
+  const s = await api('/api/settings') || {};
+  const cmds = s.commands || {};
+  const defaults = { cmdNotFound: true, wrongUsage: true, noPermissions: true, disabledInChannel: false, onCooldown: true };
+  const merged = { ...defaults, ...cmds };
+  for (const [key, val] of Object.entries(merged)) {
+    const el = document.querySelector(`.toggle[data-key="${key}"]`);
+    if (el) {
+      el.dataset.on = String(val);
+    }
+  }
+}
+
+function flipToggle(el) {
+  const current = el.dataset.on === 'true';
+  el.dataset.on = String(!current);
+}
+
+async function saveCommands() {
+  const toggles = document.querySelectorAll('.toggle[data-key]');
+  const cmds = {};
+  toggles.forEach(t => { cmds[t.dataset.key] = t.dataset.on === 'true'; });
+  const current = await api('/api/settings') || {};
+  const r = await api('/api/settings', 'POST', { ...current, commands: cmds });
+  if (r?.success) toast('Saved ✓');
   else toast('Save failed', true);
 }
 

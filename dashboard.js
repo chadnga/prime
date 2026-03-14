@@ -19,7 +19,7 @@ const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
 // ── Discord OAuth2 ───────────────────────────────────────────────
 const CLIENT_ID      = process.env.CLIENT_ID;      // your bot's application ID
 const CLIENT_SECRET  = process.env.CLIENT_SECRET;  // from Discord Developer Portal
-const REDIRECT_URI   = `http://localhost:${PORT}/auth/callback`;
+const REDIRECT_URI   = `https://prime-ed59.onrender.com/auth/callback`;
 const DISCORD_API    = 'https://discord.com/api/v10';
 
 // ── DB keys (must match index.js) ────────────────────────────────
