@@ -440,6 +440,31 @@
   }
   .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
 
+  .am-action-picker {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .am-picker-label {
+    padding: 8px 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text3);
+    border-bottom: 1px solid var(--border);
+  }
+  .am-picker-opt {
+    padding: 9px 14px;
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .am-picker-opt:hover { background: var(--surface3); color: var(--text); }
+
   /* ═══ ROLE PICKER MODAL ═══ */
   .modal-overlay {
     position: fixed; inset: 0;
@@ -547,7 +572,10 @@
     border-radius: 6px;
     outline: none;
     text-align: center;
+    -moz-appearance: textfield;
   }
+  .am-num-input::-webkit-outer-spin-button,
+  .am-num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .am-num-input:focus { border-color: var(--accent); }
   .am-select {
     background: var(--surface3);
@@ -1397,15 +1425,46 @@ function toggleConditionBody(header) {
 function addAction(btn, key) {
   const card    = btn.closest('.am-card');
   const actions = card.querySelector('.am-actions-taken');
-  const opts    = ['Delete message', 'Mute user', 'Warn user', 'Kick user', 'Ban user'];
-  // Simple prompt-style pick — cycle through options not yet added
   const existing = Array.from(actions.querySelectorAll('.am-action-tag')).map(t => t.dataset.action);
-  const next = opts.find(o => !existing.includes(o));
-  if (!next) { toast('All actions already added', true); return; }
+
+  const ALL_ACTIONS = [
+    'Delete message', 'Warn user', 'Mute user', 'Kick user', 'Ban user',
+    'Report to moderators', 'DM user', 'Open moderation case', 'Add reactions', 'Add roles'
+  ];
+  const available = ALL_ACTIONS.filter(a => !existing.includes(a));
+  if (!available.length) { toast('All actions already added', true); return; }
+
+  // Remove any existing picker
+  card.querySelector('.am-action-picker')?.remove();
+
+  const picker = document.createElement('div');
+  picker.className = 'am-action-picker';
+  picker.innerHTML = `
+    <div class="am-picker-label">Action</div>
+    ${available.map(a => `<div class="am-picker-opt" onclick="selectAction(this,'${a}','${key}')">${a}</div>`).join('')}
+  `;
+  btn.insertAdjacentElement('beforebegin', picker);
+
+  // Close on outside click
+  setTimeout(() => {
+    document.addEventListener('click', function closePicker(e) {
+      if (!picker.contains(e.target) && e.target !== btn) {
+        picker.remove();
+        document.removeEventListener('click', closePicker);
+      }
+    });
+  }, 10);
+}
+
+function selectAction(opt, action, key) {
+  const card    = opt.closest('.am-card');
+  const actions = card.querySelector('.am-actions-taken');
+  opt.closest('.am-action-picker').remove();
+
   const tag = document.createElement('div');
-  tag.className = 'am-action-tag';
-  tag.dataset.action = next;
-  tag.innerHTML = `${next} <button onclick="this.closest('.am-action-tag').remove()" title="Remove">×</button>`;
+  tag.className    = 'am-action-tag';
+  tag.dataset.action = action;
+  tag.innerHTML    = `${action} <button onclick="this.closest('.am-action-tag').remove()" title="Remove">×</button>`;
   actions.appendChild(tag);
 }
 
@@ -1602,13 +1661,22 @@ function initConditionEditors() {
     const cfg = configs[key] || { label: 'in', unit: 'seconds' };
 
     const timeSelect = cfg.unit ? `
-      <select class="am-select" data-field="time" onchange="updateCondLabel(this)">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="30">30</option>
-        <option value="60">60</option>
-      </select>
+      <input type="number" class="am-num-input" value="5" min="1" data-field="time"
+        oninput="updateCondLabel(this)">
       <span>${cfg.unit}</span>` : '';
+
+    const ACTION_OPTS = [
+      'Delete message',
+      'Warn user',
+      'Mute user',
+      'Kick user',
+      'Ban user',
+      'Report to moderators',
+      'DM user',
+      'Open moderation case',
+      'Add reactions',
+      'Add roles',
+    ];
 
     const condHTML = `
       <div class="am-condition" style="display:none">
