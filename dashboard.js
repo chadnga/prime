@@ -202,6 +202,52 @@ app.get('/api/stats', requireAuth, async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// ROLES — fetch from Discord API using bot token
+// ══════════════════════════════════════════════════════════════════
+app.get('/api/roles', requireAuth, async (req, res) => {
+  const guildId = req.query.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  try {
+    const r = await axios.get(`${DISCORD_API}/guilds/${guildId}/roles`, {
+      headers: { Authorization: `Bot ${process.env.TOKEN}` }
+    });
+    const roles = r.data
+      .filter(role => role.name !== '@everyone')
+      .sort((a, b) => b.position - a.position)
+      .map(role => ({
+        id:       role.id,
+        name:     role.name,
+        color:    role.color ? `#${role.color.toString(16).padStart(6, '0')}` : null,
+        position: role.position
+      }));
+    res.json(roles);
+  } catch (err) {
+    console.error('roles fetch error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Failed to fetch roles' });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════
+// AUTOMOD ROLE SETTINGS
+// ══════════════════════════════════════════════════════════════════
+app.get('/api/automod-roles', requireAuth, async (req, res) => {
+  const guildId = req.query.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  const data = await db.get(`automod_roles_${guildId}`) || {};
+  res.json(data);
+});
+
+app.post('/api/automod-roles', requireAuth, async (req, res) => {
+  const { guildId, module, roles } = req.body;
+  if (!guildId || !module) return res.status(400).json({ error: 'guildId and module required' });
+  const key = `automod_roles_${guildId}`;
+  const current = await db.get(key) || {};
+  current[module] = roles || [];
+  await db.set(key, current);
+  res.json({ success: true, data: current });
+});
+
+// ══════════════════════════════════════════════════════════════════
 // WARNINGS
 // ══════════════════════════════════════════════════════════════════
 app.get('/api/warnings', requireAuth, async (req, res) => {
