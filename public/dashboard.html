@@ -618,6 +618,58 @@
   }
   .modal-footer .selected-count { font-size: 13px; color: var(--text2); }
 
+  /* ═══ DEFAULT COMMANDS ═══ */
+  .cmd-group { margin-bottom: 20px; }
+  .cmd-group-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text3);
+    padding: 6px 0; margin-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .cmd-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cmd-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    font-size: 13px; color: var(--text2);
+    font-family: 'DM Mono', monospace;
+    position: relative;
+  }
+  .cmd-pill:hover { border-color: var(--accent); color: var(--text); }
+  .cmd-help {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border2);
+    font-size: 10px; color: var(--text3); cursor: help;
+    font-family: 'DM Sans', sans-serif; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .cmd-pill:hover .cmd-help { border-color: var(--accent); color: var(--accent); }
+  .cmd-tooltip {
+    display: none;
+    position: absolute; bottom: calc(100% + 6px); left: 0;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 12px; color: var(--text2); font-family: 'DM Sans', sans-serif;
+    width: 240px; z-index: 100; line-height: 1.5;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    pointer-events: none;
+  }
+  .cmd-pill:hover .cmd-tooltip { display: block; }
+
+  /* prefix tags */
+  .prefix-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; font-size: 15px; font-family: 'DM Mono', monospace;
+    color: var(--text);
+  }
+  .prefix-tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; line-height: 1; }
+  .prefix-tag button:hover { color: var(--red); }
+
   /* ═══ CONDITION EDITOR ═══ */
   .am-condition {
     display: none;
@@ -1289,64 +1341,122 @@
       <!-- COMMANDS -->
       <div id="page-commands" class="page">
         <div class="section-header">
-          <div><h2>Commands</h2><p>Configure bot response behaviour for error messages</p></div>
-          <button class="btn btn-primary" onclick="saveCommands()">Save Changes</button>
+          <div><h2>Commands</h2><p>Manage custom commands, default commands and prefixes</p></div>
         </div>
 
+        <!-- CUSTOM COMMANDS -->
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="font-size:22px">↪</span>
+              <div>
+                <div style="font-size:15px;font-weight:600">Custom commands</div>
+                <div style="font-size:13px;color:var(--text2)">Create and manage your own commands.</div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="toast('Custom commands coming soon!', false)">Create new command</button>
+          </div>
+        </div>
+
+        <!-- DEFAULT COMMANDS -->
+        <div class="card" style="margin-bottom:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;cursor:pointer" onclick="toggleDefaultCommands()">
+            <div style="display:flex;align-items:center;gap:14px">
+              <span style="font-size:22px">📋</span>
+              <div>
+                <div style="font-size:15px;font-weight:600">Default commands</div>
+                <div style="font-size:13px;color:var(--text2)">Update permissions, aliases and more for all default commands.<br>You can also enable/disable slash commands here.</div>
+              </div>
+            </div>
+            <span id="defaultCmdArrow" style="color:var(--text3);font-size:13px;transition:transform 0.2s">▾</span>
+          </div>
+          <div id="defaultCmdsBody" style="display:none;border-top:1px solid var(--border);padding:20px">
+
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="cmdSearch" placeholder="Search commands…" oninput="filterDefaultCmds()"
+                  style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;padding:7px 12px;border-radius:8px;outline:none;width:220px">
+              </div>
+              <span style="font-size:12px;color:var(--text3)" id="cmdCount"></span>
+            </div>
+
+            <div id="defaultCmdList"></div>
+          </div>
+        </div>
+
+        <!-- PREFIXES -->
+        <div class="card" style="margin-bottom:24px">
+          <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">
+            <div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-size:15px;font-weight:600">Prefixes</span>
+                <span id="prefixCount" style="font-size:12px;font-weight:600;padding:2px 8px;background:var(--surface3);border-radius:20px;color:var(--text2)">0/5</span>
+              </div>
+              <div style="font-size:13px;color:var(--text2);margin-top:3px">Put one of the following prefixes in front of your message to execute bot commands.</div>
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="openPrefixModal()">Add prefix</button>
+          </div>
+          <div style="padding:16px 20px">
+            <div id="prefixList" style="display:flex;flex-wrap:wrap;gap:8px">
+              <span style="font-size:13px;color:var(--text3);font-style:italic">No prefixes set</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ERROR MESSAGES -->
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:12px">Error Messages</div>
         <div class="card">
-          <div class="card-header"><div><h3>Error Messages</h3><p>Control which error responses the bot sends to users</p></div></div>
           <div class="card-body" style="padding:0">
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Command not found</div><div class="tr-desc">Sent when an executed command doesn't exist.</div></div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="cmdNotFound" data-on="true"><div class="toggle-thumb"></div></div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Wrong command usage</div><div class="tr-desc">Sent when an existing command is used incorrectly.</div></div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="wrongUsage" data-on="true"><div class="toggle-thumb"></div></div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">No command permissions</div><div class="tr-desc">Sent when an unpermitted user is executing an existing command. If disabled, "Command not found" will be sent instead.</div></div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="noPermissions" data-on="true"><div class="toggle-thumb"></div></div>
+            </div>
+            <div class="toggle-row">
+              <div class="tr-text"><div class="tr-title">Disabled in channel</div><div class="tr-desc">Sent when an existing command is executed in a channel where it's disabled.</div></div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="disabledInChannel" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+            <div class="toggle-row" style="border-bottom:none">
+              <div class="tr-text"><div class="tr-title">Command on cooldown</div><div class="tr-desc">Sent when an existing command is executed while the user is on cooldown.</div></div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="onCooldown" data-on="true"><div class="toggle-thumb"></div></div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:right">
+          <button class="btn btn-primary" onclick="saveCommands()">Save Changes</button>
+        </div>
+      </div>
 
-            <div class="toggle-row" id="tr-cmdNotFound">
-              <div class="tr-text">
-                <div class="tr-title">Command not found</div>
-                <div class="tr-desc">Sent when an executed command doesn't exist.</div>
-              </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="cmdNotFound" data-on="true">
-                <div class="toggle-thumb"></div>
+      <!-- PREFIX MODAL -->
+      <div id="prefixModal" style="display:none">
+        <div class="modal-overlay" onclick="closePrefixModal()">
+          <div class="modal" style="width:400px" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <div><h3>Add prefix</h3><p>Enter a new prefix below.</p></div>
+              <button class="modal-close" onclick="closePrefixModal()">×</button>
+            </div>
+            <div class="modal-body" style="padding:20px">
+              <div class="field">
+                <label>New Prefix</label>
+                <input type="text" id="newPrefixInput" placeholder="e.g. ! or ?" maxlength="10"
+                  style="font-size:18px;text-align:center;letter-spacing:0.1em"
+                  onkeydown="if(event.key==='Enter')addPrefix()">
               </div>
             </div>
-
-            <div class="toggle-row" id="tr-wrongUsage">
-              <div class="tr-text">
-                <div class="tr-title">Wrong command usage</div>
-                <div class="tr-desc">Sent when an existing command is used incorrectly.</div>
-              </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="wrongUsage" data-on="true">
-                <div class="toggle-thumb"></div>
+            <div class="modal-footer">
+              <span></span>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-ghost btn-sm" onclick="closePrefixModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" onclick="addPrefix()">Add</button>
               </div>
             </div>
-
-            <div class="toggle-row" id="tr-noPermissions">
-              <div class="tr-text">
-                <div class="tr-title">No command permissions</div>
-                <div class="tr-desc">Sent when an unpermitted user is executing an existing command. If disabled, "Command not found" will be sent instead.</div>
-              </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="noPermissions" data-on="true">
-                <div class="toggle-thumb"></div>
-              </div>
-            </div>
-
-            <div class="toggle-row" id="tr-disabledInChannel">
-              <div class="tr-text">
-                <div class="tr-title">Disabled in channel</div>
-                <div class="tr-desc">Sent when an existing command is executed in a channel where it's disabled.</div>
-              </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="disabledInChannel" data-on="false">
-                <div class="toggle-thumb"></div>
-              </div>
-            </div>
-
-            <div class="toggle-row" style="border-bottom:none" id="tr-onCooldown">
-              <div class="tr-text">
-                <div class="tr-title">Command on cooldown</div>
-                <div class="tr-desc">Sent when an existing command is executed while the user is on cooldown.</div>
-              </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="onCooldown" data-on="true">
-                <div class="toggle-thumb"></div>
-              </div>
-            </div>
-
           </div>
         </div>
       </div>
@@ -1951,37 +2061,154 @@ async function saveSettings() {
 }
 
 // ═══════════════════════════════════════
-// COMMANDS
+// COMMANDS PAGE
 // ═══════════════════════════════════════
-const COMMANDS_KEY = 'dashboard_commands';
+const DEFAULT_COMMANDS = {
+  'Config': {
+    'disable':'Disable a command in the current server or channel.','enable':'Enable a previously disabled command.',
+    'info':'Show information about the bot configuration.','list':'List all available commands.',
+    'permissions':'Manage command permissions for roles and channels.','ping':'Check the bot\'s response time.','config':'Configure bot settings for this server.',
+  },
+  'Auto Moderation': { 'automoderation':'Configure and manage auto-moderation rules.' },
+  'Information': {
+    'avatarinfo':'Display a user\'s avatar in full size.','bannerinfo':'Display a user\'s profile banner.',
+    'channelinfo':'Show detailed info about a channel.','emojiinfo':'Show details about a custom emoji.',
+    'guildbannerinfo':'Display the server\'s banner image.','guildchannelcount':'Show the total channel count.',
+    'guildiconinfo':'Display the server\'s icon in full size.','guildinfo':'Show detailed information about this server.',
+    'guildmembercount':'Show the current member count.','guildsplashinfo':'Display the server\'s invite splash image.',
+    'roleinfo':'Show details about a specific role.','userinfo':'Show detailed information about a user.',
+  },
+  'Moderation': {
+    'ban':'Ban a member from the server.','kick':'Kick a member from the server.',
+    'mute':'Timeout/mute a member.','unmute':'Remove a timeout from a member.',
+    'unban':'Unban a previously banned user.','warn':'Issue a warning to a member.',
+    'warns':'View warnings for a member.','unwarn':'Remove a warning from a member.',
+    'purge':'Bulk delete messages in a channel.','lock':'Lock a channel to prevent messages.',
+    'unlock':'Unlock a previously locked channel.','lockall':'Lock all channels in the server.',
+    'unlockall':'Unlock all channels in the server.','massban':'Ban multiple users at once.',
+    'masskick':'Kick multiple users at once.','massmute':'Mute multiple users at once.',
+    'masswarn':'Warn multiple users at once.','archive':'Archive a moderation case.',
+    'caselist':'List all moderation cases.','caseinfo':'Show details about a specific case.',
+    'caseupdate':'Update the reason for a case.','casedelete':'Delete a moderation case.',
+    'caseclose':'Close an open moderation case.','casesplit':'Split a case into multiple cases.',
+    'report':'Report a user to moderators.','timeban':'Ban a user for a specific duration.',
+    'timekick':'Kick a user after a time delay.','timemute':'Mute a user for a specific duration.',
+    'timewarn':'Warn a user after a time delay.','setslowmode':'Set slowmode for a channel.',
+    'usernotes':'Add or view notes on a user.',
+  },
+  'Messages': { 'sendmessage':'Send a message as the bot.','sendtemplate':'Send a saved message template.' },
+  'Reaction Roles': { 'reactionroles':'Manage reaction role configurations.','reactionrolesconfig':'Configure settings for reaction roles.' },
+  'Join Roles': { 'joinroles':'Manage roles automatically assigned on join.' },
+  'Logging': { 'log':'Configure logging channels and events.' },
+};
 
-async function loadCommands() {
-  const s = await api(`/api/settings?guildId=${guildId}`) || {};
-  const cmds = s.commands || {};
-  const defaults = { cmdNotFound: true, wrongUsage: true, noPermissions: true, disabledInChannel: false, onCooldown: true };
-  const merged = { ...defaults, ...cmds };
-  for (const [key, val] of Object.entries(merged)) {
-    const el = document.querySelector(`.toggle[data-key="${key}"]`);
-    if (el) {
-      el.dataset.on = String(val);
-    }
+let prefixes    = ['!'];
+let defaultOpen = false;
+
+function toggleDefaultCommands() {
+  defaultOpen = !defaultOpen;
+  document.getElementById('defaultCmdsBody').style.display = defaultOpen ? 'block' : 'none';
+  document.getElementById('defaultCmdArrow').style.transform = defaultOpen ? 'rotate(180deg)' : '';
+  if (defaultOpen && !document.getElementById('defaultCmdList').innerHTML) {
+    renderDefaultCmds(DEFAULT_COMMANDS);
   }
 }
 
+function renderDefaultCmds(groups) {
+  const container = document.getElementById('defaultCmdList');
+  let total = 0;
+  container.innerHTML = Object.entries(groups).map(([group, cmds]) => {
+    const entries = Object.entries(cmds);
+    total += entries.length;
+    if (!entries.length) return `<div class="cmd-group"><div class="cmd-group-title">${esc(group)}</div><span style="font-size:13px;color:var(--text3)">No results</span></div>`;
+    const pills = entries.map(([name, desc]) => `
+      <span class="cmd-pill">${esc(name)}<span class="cmd-help">?</span>
+        <div class="cmd-tooltip"><strong>/${esc(name)}</strong><br>${esc(desc)}</div>
+      </span>`).join('');
+    return `<div class="cmd-group"><div class="cmd-group-title">${esc(group)}</div><div class="cmd-grid">${pills}</div></div>`;
+  }).join('');
+  document.getElementById('cmdCount').textContent = `${total} commands`;
+}
+
+function filterDefaultCmds() {
+  const q = document.getElementById('cmdSearch').value.toLowerCase();
+  if (!q) { renderDefaultCmds(DEFAULT_COMMANDS); return; }
+  const filtered = {};
+  for (const [group, cmds] of Object.entries(DEFAULT_COMMANDS)) {
+    const matches = Object.fromEntries(Object.entries(cmds).filter(([n]) => n.includes(q)));
+    if (Object.keys(matches).length) filtered[group] = matches;
+  }
+  renderDefaultCmds(Object.keys(filtered).length ? filtered : {'No results':{}});
+}
+
+async function loadCommands() {
+  if (!guildId) return;
+  const s = await api(`/api/settings?guildId=${guildId}`) || {};
+  prefixes = s.prefixes || ['!'];
+  renderPrefixes();
+  const cmds = s.commands || {};
+  const defaults = { cmdNotFound:true, wrongUsage:true, noPermissions:true, disabledInChannel:false, onCooldown:true };
+  Object.entries({...defaults,...cmds}).forEach(([key,val]) => {
+    const el = document.querySelector(`#page-commands .toggle[data-key="${key}"]`);
+    if (el) el.dataset.on = String(val);
+  });
+}
+
+function renderPrefixes() {
+  const el = document.getElementById('prefixList');
+  if (!el) return;
+  document.getElementById('prefixCount').textContent = `${prefixes.length}/5`;
+  if (!prefixes.length) { el.innerHTML = '<span style="font-size:13px;color:var(--text3);font-style:italic">No prefixes set</span>'; return; }
+  el.innerHTML = prefixes.map((p,i) => `
+    <span class="prefix-tag">${esc(p)}<button onclick="removePrefix(${i})" title="Remove">🗑</button></span>`).join('');
+}
+
+function openPrefixModal() {
+  if (prefixes.length >= 5) { toast('Max 5 prefixes', true); return; }
+  document.getElementById('newPrefixInput').value = '';
+  document.getElementById('prefixModal').style.display = 'block';
+  setTimeout(() => document.getElementById('newPrefixInput').focus(), 50);
+}
+
+function closePrefixModal() { document.getElementById('prefixModal').style.display = 'none'; }
+
+async function addPrefix() {
+  const val = document.getElementById('newPrefixInput').value.trim();
+  if (!val) { toast('Enter a prefix', true); return; }
+  if (prefixes.includes(val)) { toast('Already exists', true); return; }
+  prefixes.push(val);
+  renderPrefixes();
+  await savePrefixes();
+  closePrefixModal();
+  toast(`Prefix "${val}" added ✓`);
+}
+
+async function removePrefix(i) {
+  prefixes.splice(i, 1);
+  renderPrefixes();
+  await savePrefixes();
+  toast('Prefix removed');
+}
+
+async function savePrefixes() {
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  await apiPost('/api/settings', { ...current, prefixes });
+}
+
 function flipToggle(el) {
-  const current = el.dataset.on === 'true';
-  el.dataset.on = String(!current);
+  el.dataset.on = String(el.dataset.on !== 'true');
 }
 
 async function saveCommands() {
-  const toggles = document.querySelectorAll('.toggle[data-key]');
+  const toggles = document.querySelectorAll('#page-commands .toggle[data-key]');
   const cmds = {};
   toggles.forEach(t => { cmds[t.dataset.key] = t.dataset.on === 'true'; });
   const current = await api(`/api/settings?guildId=${guildId}`) || {};
-  const r = await apiPost('/api/settings',  { ...current, commands: cmds });
+  const r = await apiPost('/api/settings', { ...current, commands: cmds });
   if (r?.success) toast('Saved ✓');
   else toast('Save failed', true);
 }
+
 
 // ═══════════════════════════════════════
 // ESCALATION BUILDER
