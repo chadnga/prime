@@ -497,6 +497,116 @@
   }
   .modal-footer .selected-count { font-size: 13px; color: var(--text2); }
 
+  /* ═══ CONDITION EDITOR ═══ */
+  .am-condition {
+    display: none;
+    margin-top: 10px;
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .am-card.active .am-condition { display: block; }
+  .am-condition-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface3);
+    border-bottom: 1px solid var(--border2);
+    font-size: 13px;
+    color: var(--text2);
+    cursor: pointer;
+    user-select: none;
+  }
+  .am-condition-header:hover { background: rgba(255,255,255,0.04); }
+  .am-condition-header .chevron { font-size: 10px; transition: transform 0.2s; }
+  .am-condition-header.collapsed .chevron { transform: rotate(-90deg); }
+  .am-condition-body {
+    padding: 12px;
+    background: var(--surface2);
+  }
+  .am-condition-body.hidden { display: none; }
+  .am-threshold-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .am-threshold-row span { white-space: nowrap; }
+  .am-num-input {
+    width: 60px;
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    outline: none;
+    text-align: center;
+  }
+  .am-num-input:focus { border-color: var(--accent); }
+  .am-select {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+  }
+  .am-actions-section {
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .am-actions-section .add-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--text3);
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    border: 1px dashed var(--border2);
+    width: 100%;
+    background: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .am-actions-section .add-action-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(88,101,242,0.05); }
+  .am-action-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(88,101,242,0.12);
+    border: 1px solid rgba(88,101,242,0.25);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--accent);
+    margin: 4px 4px 0 0;
+  }
+  .am-action-tag button { background: none; border: none; color: var(--text3); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+  .am-action-tag button:hover { color: var(--red); }
+  .am-condition-remove {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .am-condition-remove:hover { color: var(--red); }
+
   /* ═══ AUTO MOD CARDS ═══ */
   .am-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .am-card {
@@ -1252,34 +1362,53 @@ function toggleAmCard(btn, key) {
   const card = btn.closest('.am-card');
   const inp  = card.querySelector(`input[data-key="${key}"]`);
   const isOn = inp.value === 'true';
-  inp.value  = String(!isOn);
-  const empty   = card.querySelector('.am-empty');
-  const counter = card.querySelector('.am-counter');
+
   if (!isOn) {
+    // Enable — show condition editor
+    inp.value = 'true';
     card.classList.add('active');
-    empty.textContent   = '✓ Enabled';
+    const empty = card.querySelector('.am-empty');
+    if (empty) empty.style.display = 'none';
+    const counter = card.querySelector('.am-counter');
     counter.textContent = '1 / 10';
-    btn.textContent = btn.textContent.includes('Add') ? btn.textContent.replace('Add', 'Remove') : btn.textContent;
+    btn.textContent = 'Add condition';
+    // Show condition block
+    const cond = card.querySelector('.am-condition');
+    if (cond) cond.style.display = 'block';
   } else {
+    // Disable
+    inp.value = 'false';
     card.classList.remove('active');
-    const origEmpty = {
-      am_spam: 'No actions set · Start by adding a condition',
-      am_channelSpam: 'No actions set · Start by adding a condition',
-      am_mentions: 'No actions set · Start by adding a condition',
-      am_attachments: 'No actions set · Start by adding a condition',
-      am_emojis: 'No actions set · Start by adding a condition',
-      am_messageLines: 'No actions set · Start by adding a condition',
-      am_caps: 'No actions set · Start by adding a condition',
-      am_words: 'No words set · Start by adding a group',
-      am_links: 'No links set · Start by adding a group',
-      am_invites: 'No invites set · Start by adding a group',
-      am_polls: 'No actions set · Start by adding a condition',
-    };
-    empty.textContent   = origEmpty[key] || 'No actions set';
+    const empty = card.querySelector('.am-empty');
+    if (empty) empty.style.display = '';
+    const counter = card.querySelector('.am-counter');
     counter.textContent = '0 / 10';
-    btn.textContent = btn.textContent.replace('Remove', 'Add');
+    const cond = card.querySelector('.am-condition');
+    if (cond) cond.style.display = 'none';
   }
 }
+
+function toggleConditionBody(header) {
+  header.classList.toggle('collapsed');
+  const body = header.nextElementSibling;
+  body.classList.toggle('hidden');
+}
+
+function addAction(btn, key) {
+  const card    = btn.closest('.am-card');
+  const actions = card.querySelector('.am-actions-taken');
+  const opts    = ['Delete message', 'Mute user', 'Warn user', 'Kick user', 'Ban user'];
+  // Simple prompt-style pick — cycle through options not yet added
+  const existing = Array.from(actions.querySelectorAll('.am-action-tag')).map(t => t.dataset.action);
+  const next = opts.find(o => !existing.includes(o));
+  if (!next) { toast('All actions already added', true); return; }
+  const tag = document.createElement('div');
+  tag.className = 'am-action-tag';
+  tag.dataset.action = next;
+  tag.innerHTML = `${next} <button onclick="this.closest('.am-action-tag').remove()" title="Remove">×</button>`;
+  actions.appendChild(tag);
+}
+
 
 async function saveAutomod() {
   const am = {};
@@ -1450,9 +1579,78 @@ async function saveCommands() {
   else toast('Save failed', true);
 }
 
-// ═══════════════════════════════════════
-// ROLE PICKER MODAL
-// ═══════════════════════════════════════
+// Inject condition editor into every am-card on page load
+function initConditionEditors() {
+  const configs = {
+    am_spam:        { label: 'messages in', unit: 'seconds' },
+    am_channelSpam: { label: 'channels in', unit: 'seconds' },
+    am_mentions:    { label: 'mentions in', unit: 'seconds' },
+    am_attachments: { label: 'attachments in', unit: 'seconds' },
+    am_emojis:      { label: 'emojis in', unit: 'seconds' },
+    am_messageLines:{ label: 'lines in', unit: 'seconds' },
+    am_caps:        { label: '% caps minimum', unit: '' },
+    am_words:       { label: 'matches in', unit: 'seconds' },
+    am_links:       { label: 'links in', unit: 'seconds' },
+    am_invites:     { label: 'invites in', unit: 'seconds' },
+    am_polls:       { label: 'polls in', unit: 'seconds' },
+  };
+
+  document.querySelectorAll('.am-card').forEach(card => {
+    const inp = card.querySelector('input[data-key]');
+    if (!inp) return;
+    const key = inp.dataset.key;
+    const cfg = configs[key] || { label: 'in', unit: 'seconds' };
+
+    const timeSelect = cfg.unit ? `
+      <select class="am-select" data-field="time" onchange="updateCondLabel(this)">
+        <option value="5">5</option>
+        <option value="10">10</option>
+        <option value="30">30</option>
+        <option value="60">60</option>
+      </select>
+      <span>${cfg.unit}</span>` : '';
+
+    const condHTML = `
+      <div class="am-condition" style="display:none">
+        <div class="am-condition-header" onclick="toggleConditionBody(this)">
+          <span class="chevron">▾</span>
+          <span class="am-cond-label">≥ <span class="thresh-display">3</span> ${cfg.label}${cfg.unit ? ' <span class="time-display">5</span> ' + cfg.unit : ''}</span>
+          <button class="am-condition-remove" onclick="event.stopPropagation();toggleAmCard(this.closest('.am-card').querySelector('.am-actions button:last-child'), '${key}')" title="Remove condition">×</button>
+        </div>
+        <div class="am-condition-body">
+          <div class="am-threshold-row">
+            <span>≥</span>
+            <input type="number" class="am-num-input" value="3" min="1" max="100" data-field="threshold"
+              oninput="updateCondLabel(this)">
+            <span>${cfg.label}</span>
+            ${timeSelect}
+          </div>
+          <div class="am-actions-section">
+            <div class="am-actions-taken"></div>
+            <button class="add-action-btn" onclick="addAction(this, '${key}')">
+              + No actions added — click to add
+            </button>
+          </div>
+        </div>
+      </div>`;
+    card.insertAdjacentHTML('beforeend', condHTML);
+  });
+}
+
+function updateCondLabel(input) {
+  const body    = input.closest('.am-condition-body');
+  const header  = body.previousElementSibling;
+  const thresh  = body.querySelector('[data-field=threshold]')?.value || '3';
+  const timeEl  = body.querySelector('[data-field=time]');
+  const thDisp  = header.querySelector('.thresh-display');
+  const tmDisp  = header.querySelector('.time-display');
+  if (thDisp) thDisp.textContent = thresh;
+  if (tmDisp && timeEl) tmDisp.textContent = timeEl.value;
+}
+
+// Call on DOM ready
+document.addEventListener('DOMContentLoaded', initConditionEditors);
+
 let modalModule   = null;
 let allRoles      = [];
 let selectedRoles = [];
