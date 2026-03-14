@@ -1512,7 +1512,7 @@ function loadPage(p) {
 async function loadHome() {
   if (!guildId) return;
   const [cWords, settings, warnings] = await Promise.all([
-    api('/api/censored'), api('/api/settings'), api(`/api/warnings?guildId=${guildId}`)
+    api(`/api/censored?guildId=${guildId}`), api(`/api/settings?guildId=${guildId}`), api(`/api/warnings?guildId=${guildId}`)
   ]);
   document.getElementById('st-censored').textContent = Array.isArray(cWords) ? cWords.length : '—';
   document.getElementById('st-skull').textContent    = settings?.skullThreshold ?? '—';
@@ -1550,7 +1550,7 @@ function toggleDur() {
 toggleDur();
 
 async function loadAutomod() {
-  const [words, s] = await Promise.all([api('/api/censored'), api('/api/settings')]);
+  const [words, s] = await Promise.all([api(`/api/censored?guildId=${guildId}`), api(`/api/settings?guildId=${guildId}`)]);
   renderCensor(words || []);
   loadEscalation();
   const am = s?.automod || {};
@@ -1656,8 +1656,8 @@ async function saveAutomod() {
   document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
     am[inp.dataset.key] = inp.value === 'true';
   });
-  const current = await api('/api/settings') || {};
-  const r = await api('/api/settings', 'POST', { ...current, automod: am });
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  const r = await apiPost('/api/settings',  { ...current, automod: am });
   if (r?.success) toast('Auto-mod settings saved ✓');
   else toast('Save failed', true);
 }
@@ -1681,7 +1681,7 @@ async function addWord() {
   const action = document.getElementById('cAction').value;
   const dur    = parseInt(document.getElementById('cDur').value) || null;
   if (!word) { toast('Enter a word first.', true); return; }
-  const r = await api('/api/censored/add', 'POST', { word, action, duration: dur });
+  const r = await api('/api/censored/add', 'POST', { word, action, duration: dur, guildId });
   if (r?.error) { toast(r.error, true); return; }
   document.getElementById('cWord').value = '';
   renderCensor(r.words);
@@ -1689,7 +1689,7 @@ async function addWord() {
 }
 
 async function removeWord(word) {
-  const r = await api('/api/censored/remove', 'POST', { word });
+  const r = await api('/api/censored/remove', 'POST', { word, guildId });
   if (r?.error) { toast(r.error, true); return; }
   renderCensor(r.words);
   toast(`"${word}" removed`);
@@ -1728,7 +1728,7 @@ let editingBoard = null;
 
 async function loadReactionBoard() {
   if (!guildId) { document.getElementById('boardList').innerHTML = '<div class="empty">Select a server first.</div>'; return; }
-  const s = await api('/api/settings') || {};
+  const s = await api(`/api/settings?guildId=${guildId}`) || {};
   boards = s.reactionBoards || [];
   renderBoards();
 }
@@ -1864,8 +1864,8 @@ async function saveBoard() {
   if (editingBoard !== null) boards[editingBoard] = board;
   else boards.push(board);
 
-  const current = await api('/api/settings') || {};
-  const r = await api('/api/settings', 'POST', { ...current, reactionBoards: boards });
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  const r = await apiPost('/api/settings',  { ...current, reactionBoards: boards });
   if (r?.success) {
     toast(`Board "${name}" saved ✓`);
     closeBoardModal();
@@ -1877,8 +1877,8 @@ async function saveBoard() {
 
 async function deleteBoard(idx) {
   boards.splice(idx, 1);
-  const current = await api('/api/settings') || {};
-  await api('/api/settings', 'POST', { ...current, reactionBoards: boards });
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  await apiPost('/api/settings',  { ...current, reactionBoards: boards });
   toast('Board deleted');
   renderBoards();
 }
@@ -1911,7 +1911,7 @@ async function loadLeaderboard() {
 // ═══════════════════════════════════════
 async function loadSettings() {
   const [s, roles] = await Promise.all([
-    api('/api/settings'),
+    api(`/api/settings?guildId=${guildId}`),
     guildId ? api(`/api/roles?guildId=${guildId}`) : Promise.resolve([])
   ]);
   const settings = s || {};
@@ -1945,7 +1945,7 @@ async function saveSettings() {
     escalationUser: document.getElementById('s_escalationUser').value.trim(),
     skullThreshold: parseInt(document.getElementById('s_skullThreshold').value),
   };
-  const r = await api('/api/settings', 'POST', body);
+  const r = await apiPost('/api/settings',  body);
   if (r?.success) toast('Settings saved ✓');
   else toast('Save failed', true);
 }
@@ -1956,7 +1956,7 @@ async function saveSettings() {
 const COMMANDS_KEY = 'dashboard_commands';
 
 async function loadCommands() {
-  const s = await api('/api/settings') || {};
+  const s = await api(`/api/settings?guildId=${guildId}`) || {};
   const cmds = s.commands || {};
   const defaults = { cmdNotFound: true, wrongUsage: true, noPermissions: true, disabledInChannel: false, onCooldown: true };
   const merged = { ...defaults, ...cmds };
@@ -1977,8 +1977,8 @@ async function saveCommands() {
   const toggles = document.querySelectorAll('.toggle[data-key]');
   const cmds = {};
   toggles.forEach(t => { cmds[t.dataset.key] = t.dataset.on === 'true'; });
-  const current = await api('/api/settings') || {};
-  const r = await api('/api/settings', 'POST', { ...current, commands: cmds });
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  const r = await apiPost('/api/settings',  { ...current, commands: cmds });
   if (r?.success) toast('Saved ✓');
   else toast('Save failed', true);
 }
@@ -1996,7 +1996,7 @@ const DEFAULT_ESCALATION = [
 let escalationSteps = [];
 
 async function loadEscalation() {
-  const s = await api('/api/settings') || {};
+  const s = await api(`/api/settings?guildId=${guildId}`) || {};
   escalationSteps = s.escalation ? JSON.parse(JSON.stringify(s.escalation)) : JSON.parse(JSON.stringify(DEFAULT_ESCALATION));
   renderEscalation();
 }
@@ -2061,8 +2061,8 @@ function removeStep(i) {
 }
 
 async function saveEscalation() {
-  const current = await api('/api/settings') || {};
-  const r = await api('/api/settings', 'POST', { ...current, escalation: escalationSteps });
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  const r = await apiPost('/api/settings',  { ...current, escalation: escalationSteps });
   if (r?.success) toast('Escalation saved ✓');
   else toast('Save failed', true);
 }
@@ -2238,6 +2238,12 @@ async function api(url, method='GET', body=null) {
     });
     return await r.json();
   } catch { return null; }
+}
+
+// Settings POST always needs guildId as query param
+async function apiPost(url, body) {
+  const sep = url.includes('?') ? '&' : '?';
+  return api(`${url}${sep}guildId=${guildId}`, 'POST', body);
 }
 
 function esc(s) {

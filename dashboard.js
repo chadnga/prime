@@ -107,40 +107,45 @@ app.get('/api/me', requireAuth, (req, res) => {
 // ══════════════════════════════════════════════════════════════════
 // CENSORED WORDS
 // ══════════════════════════════════════════════════════════════════
+const CENSOR_KEY = (guildId) => `censored_words_${guildId}`;
+
 app.get('/api/censored', requireAuth, async (req, res) => {
-  const words = await db.get(CENSOR_KEY) || [];
+  const guildId = req.query.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  const words = await db.get(CENSOR_KEY(guildId)) || [];
   res.json(words);
 });
 
 app.post('/api/censored/add', requireAuth, async (req, res) => {
-  const { word, action, duration } = req.body;
-  if (!word || !action) return res.status(400).json({ error: 'word and action required' });
-  const words = await db.get(CENSOR_KEY) || [];
+  const { word, action, duration, guildId } = req.body;
+  if (!word || !action || !guildId) return res.status(400).json({ error: 'word, action and guildId required' });
+  const words = await db.get(CENSOR_KEY(guildId)) || [];
   if (words.find(w => w.word.toLowerCase() === word.toLowerCase())) {
     return res.status(409).json({ error: 'Word already exists' });
   }
   words.push({ word, action, duration: action === 'mute' ? (duration * 60000 || null) : null });
-  await db.set(CENSOR_KEY, words);
+  await db.set(CENSOR_KEY(guildId), words);
   res.json({ success: true, words });
 });
 
 app.post('/api/censored/remove', requireAuth, async (req, res) => {
-  const { word } = req.body;
-  let words = await db.get(CENSOR_KEY) || [];
+  const { word, guildId } = req.body;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  let words = await db.get(CENSOR_KEY(guildId)) || [];
   words = words.filter(w => w.word.toLowerCase() !== word.toLowerCase());
-  await db.set(CENSOR_KEY, words);
+  await db.set(CENSOR_KEY(guildId), words);
   res.json({ success: true, words });
 });
 
 // ══════════════════════════════════════════════════════════════════
 // BOT SETTINGS (skull threshold, pic perms roles, etc.)
 // ══════════════════════════════════════════════════════════════════
-const SETTINGS_KEY = 'dashboard_settings';
+const SETTINGS_KEY = (guildId) => `dashboard_settings_${guildId}`;
 
 const DEFAULT_SETTINGS = {
   skullThreshold:  5,
-  picPermsRole:    '𝑷𝒍𝒆𝒃𝒆𝒊𝒖𝒔',
-  picPermsExempt:  '𝑺𝒆𝒓𝒗𝒖𝒔',
+  picPermsRole:    '',
+  picPermsExempt:  '',
   xpPerMessage:    10,
   cooldownMs:      5000,
   spamLimit:       5,
@@ -148,14 +153,19 @@ const DEFAULT_SETTINGS = {
 };
 
 app.get('/api/settings', requireAuth, async (req, res) => {
-  const saved = await db.get(SETTINGS_KEY) || {};
+  const guildId = req.query.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  const saved = await db.get(SETTINGS_KEY(guildId)) || {};
   res.json({ ...DEFAULT_SETTINGS, ...saved });
 });
 
 app.post('/api/settings', requireAuth, async (req, res) => {
-  const current = await db.get(SETTINGS_KEY) || {};
+  const guildId = req.query.guildId || req.body.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  const current = await db.get(SETTINGS_KEY(guildId)) || {};
   const updated = { ...current, ...req.body };
-  await db.set(SETTINGS_KEY, updated);
+  delete updated.guildId;
+  await db.set(SETTINGS_KEY(guildId), updated);
   res.json({ success: true, settings: updated });
 });
 
