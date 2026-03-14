@@ -440,7 +440,47 @@
   }
   .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
 
-  .am-action-picker {
+  /* ═══ ESCALATION BUILDER ═══ */
+  .escalation-steps { display: flex; flex-direction: column; gap: 6px; }
+  .escalation-step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+  }
+  .escalation-step .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .escalation-step .step-label { font-size: 13px; color: var(--text2); width: 80px; flex-shrink: 0; }
+  .escalation-step select, .escalation-step input[type=number] {
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    outline: none;
+  }
+  .escalation-step select:focus, .escalation-step input:focus { border-color: var(--accent); }
+  .escalation-step .step-dur { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
+  .escalation-step input[type=number] {
+    width: 70px; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .escalation-step input[type=number]::-webkit-outer-spin-button,
+  .escalation-step input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .escalation-arrow { text-align: center; color: var(--text3); font-size: 16px; }
+  .escalation-save { margin-top: 10px; }
+
+  /* ═══ ACTION PICKER ═══ */
     background: var(--surface2);
     border: 1px solid var(--border2);
     border-radius: 8px;
@@ -854,7 +894,15 @@
         <div class="card">
           <div class="card-header"><div><h3>🚫 Censored Words</h3><p>Messages containing these words are deleted and escalated</p></div></div>
           <div class="card-body">
-            <div class="info"><span class="info-icon">ℹ️</span> Escalation order: Warn → Mute 5m → Mute 10m → Mute 2h + ping escalation user</div>
+
+            <!-- ESCALATION BUILDER -->
+            <div style="margin-bottom:20px">
+              <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em;">Escalation Order</div>
+              <div class="escalation-steps" id="escalationSteps">
+                <!-- Steps rendered by JS -->
+              </div>
+            </div>
+
             <div class="row">
               <div class="field"><label>Word or Phrase</label><input type="text" id="cWord" placeholder="e.g. badword"></div>
               <div class="field" style="max-width:140px"><label>Action</label>
@@ -1371,6 +1419,7 @@ toggleDur();
 async function loadAutomod() {
   const [words, s] = await Promise.all([api('/api/censored'), api('/api/settings')]);
   renderCensor(words || []);
+  loadEscalation();
   const am = s?.automod || {};
   document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
     const key = inp.dataset.key;
@@ -1392,25 +1441,25 @@ function toggleAmCard(btn, key) {
   const isOn = inp.value === 'true';
 
   if (!isOn) {
-    // Enable — show condition editor
     inp.value = 'true';
     card.classList.add('active');
     const empty = card.querySelector('.am-empty');
     if (empty) empty.style.display = 'none';
-    const counter = card.querySelector('.am-counter');
-    counter.textContent = '1 / 10';
-    btn.textContent = 'Add condition';
-    // Show condition block
+    card.querySelector('.am-counter').textContent = '1 / 10';
+    btn.textContent = 'Remove Conditions';
+    btn.classList.remove('btn-primary');
+    btn.classList.add('btn-danger');
     const cond = card.querySelector('.am-condition');
     if (cond) cond.style.display = 'block';
   } else {
-    // Disable
     inp.value = 'false';
     card.classList.remove('active');
     const empty = card.querySelector('.am-empty');
     if (empty) empty.style.display = '';
-    const counter = card.querySelector('.am-counter');
-    counter.textContent = '0 / 10';
+    card.querySelector('.am-counter').textContent = '0 / 10';
+    btn.textContent = 'Add condition';
+    btn.classList.remove('btn-danger');
+    btn.classList.add('btn-primary');
     const cond = card.querySelector('.am-condition');
     if (cond) cond.style.display = 'none';
   }
@@ -1638,6 +1687,91 @@ async function saveCommands() {
   else toast('Save failed', true);
 }
 
+// ═══════════════════════════════════════
+// ESCALATION BUILDER
+// ═══════════════════════════════════════
+const DEFAULT_ESCALATION = [
+  { action: 'warn', duration: null },
+  { action: 'mute', duration: 5   },
+  { action: 'mute', duration: 10  },
+  { action: 'mute', duration: 120 },
+];
+
+let escalationSteps = [];
+
+async function loadEscalation() {
+  const s = await api('/api/settings') || {};
+  escalationSteps = s.escalation ? JSON.parse(JSON.stringify(s.escalation)) : JSON.parse(JSON.stringify(DEFAULT_ESCALATION));
+  renderEscalation();
+}
+
+function renderEscalation() {
+  const container = document.getElementById('escalationSteps');
+  if (!container) return;
+  container.innerHTML = '';
+  escalationSteps.forEach((step, i) => {
+    const showDur = step.action === 'mute';
+    const durHTML = showDur ? `
+      <div class="step-dur">
+        <input type="number" value="${step.duration || 5}" min="1" style="width:60px"
+          onchange="escalationSteps[${i}].duration=parseInt(this.value)||1">
+        <span>min</span>
+      </div>` : `<span style="font-size:13px;color:var(--text3)">${step.action === 'warn' ? 'Send warning' : 'Immediate'}</span>`;
+
+    const row = document.createElement('div');
+    row.innerHTML = `<div class="escalation-step">
+      <div class="step-num">${i+1}</div>
+      <span class="step-label">Warning ${i+1}</span>
+      <select onchange="onEscalationChange(this,${i})">
+        <option value="warn" ${step.action==='warn'?'selected':''}>Warn</option>
+        <option value="mute" ${step.action==='mute'?'selected':''}>Mute</option>
+        <option value="kick" ${step.action==='kick'?'selected':''}>Kick</option>
+        <option value="ban"  ${step.action==='ban' ?'selected':''}>Ban</option>
+      </select>
+      ${durHTML}
+      ${i>=1?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeStep(${i})">Remove</button>`:'<span style="margin-left:auto"></span>'}
+    </div>`;
+    container.appendChild(row.firstElementChild);
+    if (i < escalationSteps.length-1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'escalation-arrow';
+      arrow.textContent = '↓';
+      container.appendChild(arrow);
+    }
+  });
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:8px;margin-top:10px';
+  btns.innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="addStep()">+ Add Step</button>
+    <button class="btn btn-primary btn-sm" onclick="saveEscalation()">Save Escalation</button>`;
+  container.appendChild(btns);
+}
+
+function onEscalationChange(sel, i) {
+  escalationSteps[i].action = sel.value;
+  escalationSteps[i].duration = sel.value === 'mute' ? (escalationSteps[i].duration || 5) : null;
+  renderEscalation();
+}
+
+function addStep() {
+  if (escalationSteps.length >= 8) { toast('Max 8 steps', true); return; }
+  escalationSteps.push({ action: 'mute', duration: 60 });
+  renderEscalation();
+}
+
+function removeStep(i) {
+  escalationSteps.splice(i, 1);
+  renderEscalation();
+}
+
+async function saveEscalation() {
+  const current = await api('/api/settings') || {};
+  const r = await api('/api/settings', 'POST', { ...current, escalation: escalationSteps });
+  if (r?.success) toast('Escalation saved ✓');
+  else toast('Save failed', true);
+}
+
+// ═══════════════════════════════════════
 // Inject condition editor into every am-card on page load
 function initConditionEditors() {
   const configs = {
