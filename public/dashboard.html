@@ -440,6 +440,35 @@
   }
   .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
 
+  /* ═══ AUTO MOD CARDS ═══ */
+  .am-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .am-card {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 16px;
+    transition: border-color 0.2s;
+  }
+  .am-card.active { border-color: var(--accent); }
+  .am-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .am-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .am-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .am-counter {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text3);
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 2px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .am-card.active .am-counter { color: var(--accent); border-color: var(--accent); background: rgba(88,101,242,0.1); }
+  .am-actions { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .am-empty { font-size: 12px; color: var(--text3); font-style: italic; text-align: center; padding: 8px 0; border-top: 1px solid var(--border); }
+  .am-card.active .am-empty { color: var(--green); font-style: normal; }
+
   /* ═══ EMPTY / LOADING ═══ */
   .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
   .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
@@ -657,88 +686,186 @@
         <!-- ADVANCED AUTO MOD -->
         <div class="card">
           <div class="card-header"><div><h3>⚡ Advanced Auto Moderation</h3><p>Toggle automatic actions for common spam and abuse patterns</p></div></div>
-          <div class="card-body" style="padding:0">
+          <div class="card-body">
+            <div class="am-grid">
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Spam</div>
-                <div class="tr-desc">Take actions when a user sends messages too fast.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Spam</div>
+                    <div class="am-desc">Take actions when a user sends messages too fast.</div>
+                  </div>
+                  <div class="am-counter" id="am-count-spam">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_spam')">Add condition</button>
+                </div>
+                <div class="am-empty" id="am-empty-spam">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_spam" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_spam" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Channel Spam</div>
-                <div class="tr-desc">Take actions when a user sends messages across multiple channels too fast.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Channel Spam</div>
+                    <div class="am-desc">Take actions when a user sends messages across multiple channels too fast.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_channelSpam')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_channelSpam" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_channelSpam" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Mentions</div>
-                <div class="tr-desc">Take actions when a user mentions too many users in a short time.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Mentions</div>
+                    <div class="am-desc">Take actions when a user mentions too many users in a short time.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_mentions')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_mentions" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_mentions" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Attachments</div>
-                <div class="tr-desc">Take actions when a user sends too many attachments in a short time.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Attachments</div>
+                    <div class="am-desc">Take actions when a user sends too many attachments in a short time.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_attachments')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_attachments" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_attachments" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Emojis</div>
-                <div class="tr-desc">Take actions when a user sends too many emojis in a short time.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Emojis</div>
+                    <div class="am-desc">Take actions when a user sends too many emojis in a short time.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_emojis')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_emojis" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_emojis" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Message Lines</div>
-                <div class="tr-desc">Take actions when a user sends too many message lines (large messages) in a short time.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Message Lines</div>
+                    <div class="am-desc">Take actions when a user sends too many message lines (large messages) in a short time.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_messageLines')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_messageLines" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_messageLines" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Capitalization</div>
-                <div class="tr-desc">Take actions when a user's message has too many capitalized letters.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Capitalization</div>
+                    <div class="am-desc">Take actions when a user's message has too many capitalized letters.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_caps')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_caps" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_caps" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Links</div>
-                <div class="tr-desc">Take actions when a user's message includes links.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Words</div>
+                    <div class="am-desc">Take actions when a user's message includes certain words.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles and channels</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_words')">Add group</button>
+                </div>
+                <div class="am-empty">No words set · Start by adding a group</div>
+                <input type="hidden" data-key="am_words" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_links" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row">
-              <div class="tr-text">
-                <div class="tr-title">Discord Invites</div>
-                <div class="tr-desc">Take actions when a user's message includes a Discord invite link.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Links</div>
+                    <div class="am-desc">Take actions when a user's message includes links.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles and channels</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_links')">Add group</button>
+                </div>
+                <div class="am-empty">No links set · Start by adding a group</div>
+                <input type="hidden" data-key="am_links" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_invites" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
-            <div class="toggle-row" style="border-bottom:none">
-              <div class="tr-text">
-                <div class="tr-title">Polls</div>
-                <div class="tr-desc">Take actions when a user's message includes a native Discord poll.</div>
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Discord Invites</div>
+                    <div class="am-desc">Take actions when a user's message includes a Discord invite.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles and channels</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_invites')">Add group</button>
+                </div>
+                <div class="am-empty">No invites set · Start by adding a group</div>
+                <input type="hidden" data-key="am_invites" value="false">
               </div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="am_polls" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
 
+              <div class="am-card">
+                <div class="am-top">
+                  <div>
+                    <div class="am-title">Polls</div>
+                    <div class="am-desc">Take actions when a user's message includes a native Discord poll.</div>
+                  </div>
+                  <div class="am-counter">0 / 10</div>
+                </div>
+                <div class="am-actions">
+                  <button class="btn btn-ghost btn-sm">Manage roles</button>
+                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_polls')">Add condition</button>
+                </div>
+                <div class="am-empty">No actions set · Start by adding a condition</div>
+                <input type="hidden" data-key="am_polls" value="false">
+              </div>
+
+            </div>
           </div>
         </div>
       </div>
@@ -1023,22 +1150,58 @@ toggleDur();
 async function loadAutomod() {
   const [words, s] = await Promise.all([api('/api/censored'), api('/api/settings')]);
   renderCensor(words || []);
-
-  // Load advanced toggles
   const am = s?.automod || {};
-  const keys = ['am_spam','am_channelSpam','am_mentions','am_attachments','am_emojis','am_messageLines','am_caps','am_links','am_invites','am_polls'];
-  keys.forEach(k => {
-    const el = document.querySelector(`.toggle[data-key="${k}"]`);
-    if (el) el.dataset.on = String(am[k] === true);
+  document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
+    const key = inp.dataset.key;
+    const val = am[key] === true;
+    inp.value = String(val);
+    const card = inp.closest('.am-card');
+    if (val) {
+      card.classList.add('active');
+      card.querySelector('.am-empty').textContent = '✓ Enabled';
+      const counter = card.querySelector('.am-counter');
+      counter.textContent = '1 / 10';
+    }
   });
 }
 
+function toggleAmCard(btn, key) {
+  const card = btn.closest('.am-card');
+  const inp  = card.querySelector(`input[data-key="${key}"]`);
+  const isOn = inp.value === 'true';
+  inp.value  = String(!isOn);
+  const empty   = card.querySelector('.am-empty');
+  const counter = card.querySelector('.am-counter');
+  if (!isOn) {
+    card.classList.add('active');
+    empty.textContent   = '✓ Enabled';
+    counter.textContent = '1 / 10';
+    btn.textContent = btn.textContent.includes('Add') ? btn.textContent.replace('Add', 'Remove') : btn.textContent;
+  } else {
+    card.classList.remove('active');
+    const origEmpty = {
+      am_spam: 'No actions set · Start by adding a condition',
+      am_channelSpam: 'No actions set · Start by adding a condition',
+      am_mentions: 'No actions set · Start by adding a condition',
+      am_attachments: 'No actions set · Start by adding a condition',
+      am_emojis: 'No actions set · Start by adding a condition',
+      am_messageLines: 'No actions set · Start by adding a condition',
+      am_caps: 'No actions set · Start by adding a condition',
+      am_words: 'No words set · Start by adding a group',
+      am_links: 'No links set · Start by adding a group',
+      am_invites: 'No invites set · Start by adding a group',
+      am_polls: 'No actions set · Start by adding a condition',
+    };
+    empty.textContent   = origEmpty[key] || 'No actions set';
+    counter.textContent = '0 / 10';
+    btn.textContent = btn.textContent.replace('Remove', 'Add');
+  }
+}
+
 async function saveAutomod() {
-  const keys = ['am_spam','am_channelSpam','am_mentions','am_attachments','am_emojis','am_messageLines','am_caps','am_links','am_invites','am_polls'];
   const am = {};
-  keys.forEach(k => {
-    const el = document.querySelector(`.toggle[data-key="${k}"]`);
-    if (el) am[k] = el.dataset.on === 'true';
+  document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
+    am[inp.dataset.key] = inp.value === 'true';
   });
   const current = await api('/api/settings') || {};
   const r = await api('/api/settings', 'POST', { ...current, automod: am });
