@@ -202,6 +202,27 @@ app.get('/api/stats', requireAuth, async (req, res) => {
 });
 
 // ══════════════════════════════════════════════════════════════════
+// CHANNELS — fetch text channels from Discord API
+// ══════════════════════════════════════════════════════════════════
+app.get('/api/channels', requireAuth, async (req, res) => {
+  const guildId = req.query.guildId;
+  if (!guildId) return res.status(400).json({ error: 'guildId required' });
+  try {
+    const r = await axios.get(`${DISCORD_API}/guilds/${guildId}/channels`, {
+      headers: { Authorization: `Bot ${process.env.TOKEN}` }
+    });
+    const channels = r.data
+      .filter(c => c.type === 0) // text channels only
+      .sort((a, b) => a.position - b.position)
+      .map(c => ({ id: c.id, name: c.name, parent_id: c.parent_id }));
+    res.json(channels);
+  } catch (err) {
+    console.error('channels fetch error:', err.response?.data || err.message);
+    res.status(500).json({ error: 'Failed to fetch channels' });
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════
 // ROLES — fetch from Discord API using bot token
 // ══════════════════════════════════════════════════════════════════
 app.get('/api/roles', requireAuth, async (req, res) => {
