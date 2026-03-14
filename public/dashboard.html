@@ -621,12 +621,14 @@
         <div class="section-header">
           <div>
             <h2>Auto Moderation</h2>
-            <p>Words that trigger the auto-escalation warning system</p>
+            <p>Configure automatic moderation rules for your server</p>
           </div>
+          <button class="btn btn-primary" onclick="saveAutomod()">Save Changes</button>
         </div>
 
+        <!-- CENSORED WORDS -->
         <div class="card">
-          <div class="card-header"><div><h3>Add Censored Word</h3><p>Detected messages are deleted and the user is warned</p></div></div>
+          <div class="card-header"><div><h3>🚫 Censored Words</h3><p>Messages containing these words are deleted and escalated</p></div></div>
           <div class="card-body">
             <div class="info"><span class="info-icon">ℹ️</span> Escalation order: Warn → Mute 5m → Mute 10m → Mute 2h + ping escalation user</div>
             <div class="row">
@@ -644,15 +646,99 @@
               <button class="btn btn-primary" onclick="addWord()">Add Word</button>
             </div>
           </div>
-        </div>
-
-        <div class="card">
-          <div class="card-header"><div><h3>Active Filters</h3><p id="censorCount">Loading…</p></div></div>
           <div class="table-wrap">
             <table>
               <thead><tr><th>Word / Phrase</th><th>Action</th><th>Duration</th><th></th></tr></thead>
               <tbody id="cTbody"><tr><td colspan="4" class="loading">Loading</td></tr></tbody>
             </table>
+          </div>
+        </div>
+
+        <!-- ADVANCED AUTO MOD -->
+        <div class="card">
+          <div class="card-header"><div><h3>⚡ Advanced Auto Moderation</h3><p>Toggle automatic actions for common spam and abuse patterns</p></div></div>
+          <div class="card-body" style="padding:0">
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Spam</div>
+                <div class="tr-desc">Take actions when a user sends messages too fast.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_spam" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Channel Spam</div>
+                <div class="tr-desc">Take actions when a user sends messages across multiple channels too fast.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_channelSpam" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Mentions</div>
+                <div class="tr-desc">Take actions when a user mentions too many users in a short time.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_mentions" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Attachments</div>
+                <div class="tr-desc">Take actions when a user sends too many attachments in a short time.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_attachments" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Emojis</div>
+                <div class="tr-desc">Take actions when a user sends too many emojis in a short time.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_emojis" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Message Lines</div>
+                <div class="tr-desc">Take actions when a user sends too many message lines (large messages) in a short time.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_messageLines" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Capitalization</div>
+                <div class="tr-desc">Take actions when a user's message has too many capitalized letters.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_caps" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Links</div>
+                <div class="tr-desc">Take actions when a user's message includes links.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_links" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row">
+              <div class="tr-text">
+                <div class="tr-title">Discord Invites</div>
+                <div class="tr-desc">Take actions when a user's message includes a Discord invite link.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_invites" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
+            <div class="toggle-row" style="border-bottom:none">
+              <div class="tr-text">
+                <div class="tr-title">Polls</div>
+                <div class="tr-desc">Take actions when a user's message includes a native Discord poll.</div>
+              </div>
+              <div class="toggle" onclick="flipToggle(this)" data-key="am_polls" data-on="false"><div class="toggle-thumb"></div></div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -935,12 +1021,34 @@ function toggleDur() {
 toggleDur();
 
 async function loadAutomod() {
-  const words = await api('/api/censored') || [];
-  renderCensor(words);
+  const [words, s] = await Promise.all([api('/api/censored'), api('/api/settings')]);
+  renderCensor(words || []);
+
+  // Load advanced toggles
+  const am = s?.automod || {};
+  const keys = ['am_spam','am_channelSpam','am_mentions','am_attachments','am_emojis','am_messageLines','am_caps','am_links','am_invites','am_polls'];
+  keys.forEach(k => {
+    const el = document.querySelector(`.toggle[data-key="${k}"]`);
+    if (el) el.dataset.on = String(am[k] === true);
+  });
+}
+
+async function saveAutomod() {
+  const keys = ['am_spam','am_channelSpam','am_mentions','am_attachments','am_emojis','am_messageLines','am_caps','am_links','am_invites','am_polls'];
+  const am = {};
+  keys.forEach(k => {
+    const el = document.querySelector(`.toggle[data-key="${k}"]`);
+    if (el) am[k] = el.dataset.on === 'true';
+  });
+  const current = await api('/api/settings') || {};
+  const r = await api('/api/settings', 'POST', { ...current, automod: am });
+  if (r?.success) toast('Auto-mod settings saved ✓');
+  else toast('Save failed', true);
 }
 
 function renderCensor(words) {
-  document.getElementById('censorCount').textContent = `${words.length} active filter${words.length !== 1 ? 's' : ''}`;
+  const countEl = document.getElementById('censorCount');
+  if (countEl) countEl.textContent = `${words.length} active filter${words.length !== 1 ? 's' : ''}`;
   const tb = document.getElementById('cTbody');
   if (!words.length) { tb.innerHTML = `<tr><td colspan="4" class="empty">No censored words yet. Add one above.</td></tr>`; return; }
   tb.innerHTML = words.map(w => `
