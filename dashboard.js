@@ -9,9 +9,24 @@ const express     = require('express');
 const session     = require('express-session');
 const axios       = require('axios');
 const path        = require('path');
+const { spawn }   = require('child_process');
 require('dotenv').config();
 const { QuickDB } = require('quick.db');
 const db          = new QuickDB();
+
+// ── Start the bot as a child process ─────────────────────────────
+function startBot() {
+  console.log('🤖 Starting bot (index.js)...');
+  const bot = spawn('node', ['index.js'], {
+    stdio: 'inherit',
+    env: process.env
+  });
+  bot.on('exit', (code) => {
+    console.log(`⚠️ Bot exited (${code}) — restarting in 3s...`);
+    setTimeout(startBot, 3000);
+  });
+}
+startBot();
 
 const app  = express();
 const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
@@ -29,6 +44,14 @@ const JOIN_LEAVE_STATS_PREFIX = 'join_leave_stats';
 
 // ── Middleware ───────────────────────────────────────────────────
 app.use(express.json());
+// Force no caching so Render always serves fresh files
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
   secret: process.env.DASHBOARD_SECRET || 'primelooks-dashboard-secret-change-me',
