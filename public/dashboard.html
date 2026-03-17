@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PrimeLooks — Dashboard</title>
+<title>PrimeLooks — Command Center</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,7 +22,6 @@
     --red:        #8b2020;
     --red-light:  #c0392b;
     --yellow:     #c9a84c;
-    --skull:      #c9a84c;
     --gold:       #c9a84c;
     --gold-light: #e8c97a;
     --gold-dim:   #5a4520;
@@ -34,15 +33,9 @@
     --sidebar-w:  252px;
   }
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 16px;
-  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Crimson Pro', Georgia, serif; font-size: 16px; }
 
-  /* Subtle marble grain overlay */
+  /* Marble grain texture */
   body::before {
     content: '';
     position: fixed; inset: 0; pointer-events: none; z-index: 0;
@@ -53,6 +46,12 @@
 
   /* ═══ LAYOUT ═══ */
   .app { display: flex; min-height: 100vh; position: relative; z-index: 1; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--gold-dim); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
   /* ═══ SIDEBAR ═══ */
   .sidebar {
@@ -67,21 +66,55 @@
       repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(201,168,76,0.015) 48px, rgba(201,168,76,0.015) 50px);
   }
 
-  .sidebar-top {
-    padding: 16px;
+  .sidebar-brand {
+    text-align: center;
+    padding: 20px 12px 14px;
     border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .sidebar-brand::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20%; right: 20%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .brand-title {
+    font-family: 'Cinzel', serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    color: var(--gold-light);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(201,168,76,0.25);
+  }
+  .brand-subtitle {
+    font-size: 8px;
+    letter-spacing: 0.35em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    font-family: 'Cinzel', serif;
+    margin-top: 3px;
+    display: block;
+  }
+  .brand-divider {
+    color: var(--gold-dim);
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    margin-top: 7px;
+    opacity: 0.6;
   }
 
+  .sidebar-server {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+  }
   .server-chip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    cursor: pointer;
-    transition: background 0.15s;
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 3px;
+    background: var(--surface); border: 1px solid var(--border);
+    cursor: pointer; transition: background 0.15s;
+    margin-bottom: 6px;
   }
   .server-chip:hover { background: var(--surface2); }
   .server-chip .s-icon {
@@ -92,78 +125,45 @@
   }
   .server-chip .s-name { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .server-chip .s-arrow { color: var(--text3); font-size: 11px; }
-
-  .guild-select-wrap { margin-top: 8px; }
   .guild-select-wrap select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    color: var(--text2);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 13px;
-    padding: 8px 10px;
-    border-radius: 3px;
-    appearance: none;
-    outline: none;
-    cursor: pointer;
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text2); font-family: 'Crimson Pro', Georgia, serif; font-size: 13px;
+    padding: 7px 10px; border-radius: 3px; appearance: none; outline: none; cursor: pointer;
   }
+  .guild-select-wrap select:focus { border-color: var(--gold); }
 
-  .nav { padding: 12px 8px; flex: 1; }
-
+  .nav { padding: 10px 8px; flex: 1; }
   .nav-label {
-    font-size: 9px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    color: var(--gold-dim);
-    padding: 12px 10px 4px;
-    font-family: 'Cinzel', serif;
+    font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.22em; color: var(--gold-dim);
+    padding: 14px 10px 5px; font-family: 'Cinzel', serif;
   }
-
   .nav-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 9px 10px;
-    border-radius: 3px;
-    color: var(--text2);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
-    user-select: none;
-    position: relative;
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 2px;
+    color: var(--text2); font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.15s; user-select: none;
   }
   .nav-item:hover { background: var(--surface); color: var(--text); }
-  .nav-item.active { background: rgba(201,168,76,0.10); color: var(--gold-light); border-left: 2px solid var(--gold); }
+  .nav-item.active {
+    background: rgba(201,168,76,0.08);
+    color: var(--gold-light);
+    border-left: 2px solid var(--gold);
+    padding-left: 8px;
+  }
   .nav-item.active .nav-icon { color: var(--gold); }
   .nav-icon { font-size: 15px; width: 20px; text-align: center; flex-shrink: 0; }
-
-  .badge-new {
-    margin-left: auto;
-    background: var(--gold);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 6px;
-    border-radius: 2px;
-    letter-spacing: 0.04em;
-  }
 
   .sidebar-footer {
     padding: 12px;
     border-top: 1px solid var(--border);
   }
   .user-bar {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px 10px;
-    border-radius: 4px;
-    background: var(--surface);
-    border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 3px;
+    background: var(--surface); border: 1px solid var(--border);
   }
-  .user-bar img { width: 32px; height: 32px; border-radius: 50%; }
+  .user-bar img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--gold-dim); }
   .user-bar .uname { font-size: 13px; font-weight: 600; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .logout-link { color: var(--text3); font-size: 16px; text-decoration: none; transition: color 0.15s; }
   .logout-link:hover { color: var(--red); }
@@ -172,263 +172,210 @@
   .main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
 
   .topbar {
-    padding: 0 36px;
-    height: 56px;
+    padding: 0 36px; height: 56px;
     border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     background: var(--sidebar);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    background-image: linear-gradient(90deg, rgba(201,168,76,0.06) 0%, transparent 50%);
+    position: sticky; top: 0; z-index: 100;
+    background-image: linear-gradient(90deg, rgba(201,168,76,0.05) 0%, transparent 60%);
   }
-
   .topbar-left { display: flex; align-items: center; gap: 10px; }
-  .topbar-left h1 { font-size: 16px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.08em; color: var(--gold-light); }
+  .topbar-left h1 { font-size: 15px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.1em; color: var(--gold-light); }
   .topbar-left .sep { color: var(--gold-dim); }
   .topbar-left .sub { font-size: 14px; color: var(--text2); font-style: italic; }
-
-  .content { padding: 32px; flex: 1; position: relative; }
-  /* Transparent Roman eagle watermark in content */
-  .content::before {
-    content: '🦅';
-    position: fixed;
-    bottom: 40px; right: 40px;
-    font-size: 180px;
-    opacity: 0.02;
-    pointer-events: none;
-    z-index: 0;
+  .topbar-ornament {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'Cinzel', serif; font-size: 10px; letter-spacing: 0.15em;
+    color: var(--gold-dim); opacity: 0.5;
   }
-  .sidebar-top { padding: 0; }
+
+  .content { padding: 32px 36px; flex: 1; position: relative; }
+  .content::before {
+    content: 'SPQR';
+    position: fixed; bottom: 30px; right: 36px;
+    font-family: 'Cinzel', serif; font-size: 96px; font-weight: 900;
+    letter-spacing: 0.15em; color: var(--gold); opacity: 0.025;
+    pointer-events: none; z-index: 0;
+  }
 
   /* ═══ PAGES ═══ */
   .page { display: none; animation: fadeUp 0.25s ease forwards; }
   .page.active { display: block; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
   /* ═══ HOME ═══ */
-  .welcome-banner {
-    margin-bottom: 32px;
-  }
+  .welcome-banner { margin-bottom: 30px; }
   .welcome-banner h2 {
-    font-size: 28px;
-    font-weight: 700;
-    font-family: 'Cinzel', serif;
-    color: var(--text);
-    letter-spacing: 0.04em;
+    font-size: 30px; font-weight: 700; font-family: 'Cinzel', serif;
+    color: var(--text); letter-spacing: 0.05em;
   }
   .welcome-banner h2 span { color: var(--gold); }
   .welcome-banner p { font-size: 15px; color: var(--text2); margin-top: 4px; font-style: italic; }
 
-  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
-
-  .module-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    padding: 24px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .module-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, var(--gold), transparent);
-    transform: scaleX(0);
-    transition: transform 0.3s;
-    transform-origin: center;
-  }
-  .module-card:hover { background: var(--surface2); border-color: var(--gold-dim); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.08); }
-  .module-card:hover::before { transform: scaleX(1); }
-
-  .mc-icon { font-size: 28px; margin-bottom: 14px; display: block; }
-  .mc-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; font-family: 'Cinzel', serif; letter-spacing: 0.04em; }
-  .mc-desc { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; font-style: italic; }
-  .mc-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 14px;
-    background: transparent;
-    border: 1px solid var(--gold-dim);
-    border-radius: 2px;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: 'Cinzel', serif;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--text2);
-    transition: all 0.15s;
-  }
-  .mc-btn:hover { background: var(--gold); color: var(--bg); border-color: var(--gold); }
-
-  /* stat row on home */
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 28px; }
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
   .stat-pill {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 2px; padding: 16px 20px;
+    display: flex; align-items: center; gap: 14px;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s;
   }
+  .stat-pill::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+  .stat-pill:hover { border-color: var(--gold-dim); }
   .stat-pill .sp-icon { font-size: 22px; }
   .stat-pill .sp-val { font-size: 22px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; }
-  .stat-pill .sp-lbl { font-size: 12px; color: var(--text2); margin-top: 1px; }
+  .stat-pill .sp-lbl { font-size: 11px; color: var(--text2); margin-top: 1px; text-transform: uppercase; letter-spacing: 0.06em; font-family: 'Cinzel', serif; }
 
-  /* ═══ SECTION HEADER ═══ */
-  .section-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    gap: 16px;
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+  .module-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 2px; padding: 24px; cursor: pointer;
+    transition: all 0.2s; position: relative; overflow: hidden;
   }
-  .section-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.04em; font-family: 'Cinzel', serif; color: var(--gold-light); }
-  .section-header p { font-size: 14px; color: var(--text2); margin-top: 3px; }
-
-  /* ═══ CARDS ═══ */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    overflow: hidden;
-    margin-bottom: 16px;
+  .module-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    transform: scaleX(0); transition: transform 0.35s; transform-origin: center;
   }
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+  .module-card:hover { background: var(--surface2); border-color: var(--gold-dim); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(201,168,76,0.06); }
+  .module-card:hover::before { transform: scaleX(1); }
+  .mc-icon { font-size: 28px; margin-bottom: 14px; display: block; }
+  .mc-title { font-size: 14px; font-weight: 700; margin-bottom: 6px; font-family: 'Cinzel', serif; letter-spacing: 0.06em; color: var(--text); }
+  .mc-desc { font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 16px; font-style: italic; }
+  .mc-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; background: transparent;
+    border: 1px solid var(--gold-dim); border-radius: 2px;
+    font-size: 10px; font-weight: 700; font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); transition: all 0.15s;
   }
-  .card-header h3 { font-size: 12px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-light); }
-  .card-header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
-  .card-body { padding: 20px; }
-
-  /* ═══ FORMS ═══ */
-  .field { margin-bottom: 16px; }
-  .field label { display: block; font-size: 11px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text2); margin-bottom: 7px; }
-  .field input, .field select {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 14px;
-    padding: 9px 12px;
-    border-radius: 4px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus { border-color: var(--gold); }
-  .field input::placeholder { color: var(--text3); }
-
-  .row { display: flex; gap: 12px; align-items: flex-end; }
-  .row .field { flex: 1; margin-bottom: 0; }
-
-  /* ═══ BUTTONS ═══ */
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 9px 20px;
-    border-radius: 2px;
-    border: none;
-    font-family: 'Cinzel', serif;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-primary {
-    background: linear-gradient(135deg, #9a7030, #c9a84c, #9a7030);
-    background-size: 200% 100%;
-    color: #0c0906;
-    border: 1px solid var(--gold);
-    box-shadow: 0 2px 8px rgba(201,168,76,0.2);
-  }
-  .btn-primary:hover {
-    background-position: right;
-    box-shadow: 0 4px 16px rgba(201,168,76,0.35);
-    color: #0c0906;
-  }
-  .btn-ghost {
-    background: transparent;
-    color: var(--text2);
-    border: 1px solid var(--border2);
-  }
-  .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--gold-dim); }
-  .btn-danger {
-    background: rgba(122,26,26,0.15);
-    color: #d07070;
-    border: 1px solid rgba(139,32,32,0.4);
-  }
-  .btn-danger:hover { background: rgba(139,32,32,0.3); }
-  .btn-sm { padding: 6px 14px; font-size: 10px; }
-
-  /* ═══ TABLE ═══ */
-  .table-wrap { overflow-x: auto; }
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text3);
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    text-align: left;
-  }
-  tbody td { padding: 13px 16px; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover td { background: rgba(255,255,255,0.02); }
-
-  .tag {
-    display: inline-flex;
-    align-items: center;
-    padding: 3px 10px;
-    border-radius: 2px;
-    font-size: 11px;
-    font-weight: 700;
-    font-family: 'Cinzel', serif;
-    letter-spacing: 0.05em;
-  }
-  .tag-warn   { background: rgba(201,168,76,0.15); color: var(--gold-light); border: 1px solid var(--gold-dim); }
-  .tag-mute   { background: rgba(139,32,32,0.2);   color: #d07070; border: 1px solid rgba(139,32,32,0.4); }
-  .tag-gold   { background: rgba(201,168,76,0.15); color: var(--gold-light); border: 1px solid var(--gold-dim); }
-  .tag-green  { background: rgba(74,124,78,0.15);  color: #8ec892; border: 1px solid rgba(74,124,78,0.3); }
+  .mc-btn:hover { background: var(--gold); color: var(--bg); border-color: var(--gold); }
 
   /* ═══ CHART ═══ */
   .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding: 0 4px; }
   .bar-grp { flex: 1; display: flex; gap: 2px; align-items: flex-end; }
   .bar { flex: 1; min-height: 3px; border-radius: 2px 2px 0 0; transition: opacity 0.15s; }
-  .bar:hover { opacity: 0.8; }
+  .bar:hover { opacity: 0.75; }
   .bar-j { background: linear-gradient(to top, #4a7c4e, #8ec892); }
   .bar-l { background: linear-gradient(to top, #7a1a1a, #c0392b); }
   .chart-xlabels { display: flex; gap: 6px; margin-top: 8px; }
   .chart-xlabels span { flex: 1; text-align: center; font-size: 11px; color: var(--text3); }
-  .chart-legend { display: flex; gap: 16px; margin-top: 12px; }
+  .chart-legend { display: flex; gap: 16px; }
   .chart-legend span { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
   .dot { width: 8px; height: 8px; border-radius: 50%; }
 
+  /* ═══ SECTION HEADER ═══ */
+  .section-header {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; margin-bottom: 24px; gap: 16px;
+  }
+  .section-header h2 { font-size: 20px; font-weight: 700; letter-spacing: 0.05em; font-family: 'Cinzel', serif; color: var(--gold-light); }
+  .section-header p { font-size: 14px; color: var(--text2); margin-top: 3px; }
+
+  /* ═══ CARDS ═══ */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 16px; }
+  .card-header {
+    padding: 15px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: linear-gradient(90deg, rgba(201,168,76,0.03) 0%, transparent 60%);
+  }
+  .card-header h3 { font-size: 11px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold-light); }
+  .card-header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .card-body { padding: 20px; }
+
+  /* ═══ FORMS ═══ */
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 10px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); margin-bottom: 7px; }
+  .field input, .field select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'Crimson Pro', Georgia, serif; font-size: 14px;
+    padding: 9px 12px; border-radius: 2px; outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus { border-color: var(--gold); }
+  .field input::placeholder { color: var(--text3); }
+  .row { display: flex; gap: 12px; align-items: flex-end; }
+  .row .field { flex: 1; margin-bottom: 0; }
+
+  /* ═══ BUTTONS ═══ */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 9px 20px; border-radius: 2px; border: none;
+    font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #7a5a20, var(--gold), #8a6228);
+    background-size: 200% 100%;
+    color: #0c0906; border: 1px solid var(--accent2);
+    box-shadow: 0 2px 8px rgba(201,168,76,0.2);
+  }
+  .btn-primary:hover { background-position: right; box-shadow: 0 4px 18px rgba(201,168,76,0.35); }
+  .btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); border-color: var(--gold-dim); }
+  .btn-danger { background: rgba(122,26,26,0.15); color: #d07070; border: 1px solid rgba(139,32,32,0.4); }
+  .btn-danger:hover { background: rgba(139,32,32,0.28); }
+  .btn-sm { padding: 6px 14px; font-size: 9px; }
+
+  /* ═══ TABLE ═══ */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  thead th {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text3);
+    padding: 10px 16px; border-bottom: 1px solid var(--border); text-align: left;
+    font-family: 'Cinzel', serif;
+  }
+  tbody td { padding: 13px 16px; font-size: 14px; color: var(--text2); border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(201,168,76,0.02); }
+
+  .tag {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 2px;
+    font-size: 10px; font-weight: 700; font-family: 'Cinzel', serif; letter-spacing: 0.06em;
+  }
+  .tag-warn { background: rgba(201,168,76,0.12); color: var(--gold-light); border: 1px solid var(--gold-dim); }
+  .tag-mute { background: rgba(139,32,32,0.18); color: #d07070; border: 1px solid rgba(139,32,32,0.35); }
+  .tag-gold { background: rgba(201,168,76,0.12); color: var(--gold-light); border: 1px solid var(--gold-dim); }
+  .tag-green { background: rgba(74,124,78,0.15); color: #8ec892; border: 1px solid rgba(74,124,78,0.28); }
+
+  /* ═══ TOGGLE ROWS ═══ */
+  .toggle-row {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; padding: 18px 20px; border-bottom: 1px solid var(--border); transition: background 0.15s;
+  }
+  .toggle-row:hover { background: rgba(255,255,255,0.015); }
+  .tr-text { flex: 1; }
+  .tr-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .tr-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .toggle {
+    width: 44px; height: 24px; border-radius: 2px;
+    background: var(--surface3); border: 1px solid var(--border2);
+    cursor: pointer; position: relative; flex-shrink: 0; transition: background 0.2s, border-color 0.2s;
+  }
+  .toggle[data-on="true"] { background: var(--gold); border-color: var(--accent2); }
+  .toggle-thumb {
+    position: absolute; top: 2px; left: 2px;
+    width: 18px; height: 18px; border-radius: 50%; background: #fff;
+    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+  .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
+
+  /* ═══ INFO BOX ═══ */
+  .info {
+    display: flex; gap: 10px; padding: 12px 16px;
+    background: rgba(201,168,76,0.05); border: 1px solid rgba(201,168,76,0.1);
+    border-radius: 2px; font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5;
+  }
+  .info-icon { font-size: 16px; flex-shrink: 0; }
+
   /* ═══ LEADERBOARD ═══ */
   .rank-1 { color: var(--gold-light); font-weight: 700; font-family: 'Cinzel', serif; }
-  .rank-2 { color: #c0c0c0; font-weight: 700; font-family: 'Cinzel', serif; }
+  .rank-2 { color: #c8c8c8; font-weight: 700; font-family: 'Cinzel', serif; }
   .rank-3 { color: #cd7f32; font-weight: 700; font-family: 'Cinzel', serif; }
   .xp-mini { height: 4px; background: var(--surface3); border-radius: 2px; width: 100px; overflow: hidden; }
   .xp-mini-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 2px; }
@@ -436,473 +383,279 @@
   /* ═══ SETTINGS GRID ═══ */
   .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-  /* ═══ TOAST ═══ */
-  #toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
-  .toast {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 18px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    font-size: 14px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-    animation: slideIn 0.3s cubic-bezier(0.16,1,0.3,1);
+  /* ═══ ESCALATION ═══ */
+  .escalation-steps { display: flex; flex-direction: column; gap: 6px; }
+  .escalation-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: var(--surface2);
+    border: 1px solid var(--border2); border-radius: 3px;
   }
-  .toast.ok  { border-left: 3px solid var(--gold); font-family: 'Crimson Pro', serif; }
-  .toast.err { border-left: 3px solid var(--red-light); font-family: 'Crimson Pro', serif; }
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateX(20px); }
-    to   { opacity: 1; transform: translateX(0); }
+  .escalation-step .step-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--gold); color: #0c0906;
+    font-size: 11px; font-weight: 700; font-family: 'Cinzel', serif;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
+  .escalation-step .step-label { font-size: 12px; color: var(--text2); width: 90px; flex-shrink: 0; font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
+  .escalation-step select, .escalation-step input[type=number] {
+    background: var(--surface3); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'Crimson Pro', Georgia, serif;
+    font-size: 13px; padding: 5px 10px; border-radius: 2px; outline: none;
+  }
+  .escalation-step select:focus, .escalation-step input:focus { border-color: var(--gold); }
+  .escalation-step .step-dur { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
+  .escalation-step input[type=number] { width: 70px; text-align: center; -moz-appearance: textfield; }
+  .escalation-step input[type=number]::-webkit-outer-spin-button,
+  .escalation-step input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .escalation-arrow { text-align: center; color: var(--gold-dim); font-size: 14px; opacity: 0.6; }
 
-  /* ═══ TOGGLE ROWS ═══ */
-  .toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
+  /* ═══ AUTO MOD CARDS ═══ */
+  .am-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .am-card {
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 2px; padding: 16px; transition: border-color 0.2s;
   }
-  .toggle-row:hover { background: rgba(255,255,255,0.02); }
-  .tr-text { flex: 1; }
-  .tr-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
-  .tr-desc  { font-size: 13px; color: var(--text2); line-height: 1.5; }
+  .am-card.active { border-color: var(--gold); }
+  .am-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .am-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; font-family: 'Cinzel', serif; letter-spacing: 0.05em; }
+  .am-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+  .am-counter {
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    background: var(--surface3); border: 1px solid var(--border2);
+    border-radius: 2px; padding: 2px 10px; white-space: nowrap; flex-shrink: 0;
+    font-family: 'Cinzel', serif;
+  }
+  .am-card.active .am-counter { color: var(--gold-light); border-color: var(--gold-dim); background: rgba(201,168,76,0.07); }
+  .am-actions { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+  .am-empty { font-size: 12px; color: var(--text3); font-style: italic; text-align: center; padding: 8px 0; border-top: 1px solid var(--border); }
+  .am-card.active .am-empty { color: var(--gold-dim); }
 
-  .toggle {
-    width: 44px;
-    height: 24px;
-    border-radius: 3px;
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0;
-    transition: background 0.2s, border-color 0.2s;
+  /* ═══ AUTO MOD CONDITION ═══ */
+  .am-condition {
+    display: none; margin-top: 10px;
+    border: 1px solid var(--border2); border-radius: 3px; overflow: hidden;
   }
-  .toggle[data-on="true"] {
-    background: var(--gold);
-    border-color: var(--gold);
-  }
-  .toggle-thumb {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: #fff;
-    transition: transform 0.2s cubic-bezier(0.16,1,0.3,1);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
-  }
-  .toggle[data-on="true"] .toggle-thumb { transform: translateX(20px); }
-
-  /* ═══ CHANNEL PICKER ═══ */
-  .channel-opt {
+  .am-card.active .am-condition { display: block; }
+  .am-condition-header {
     display: flex; align-items: center; gap: 8px;
-    padding: 7px 10px; border-radius: 3px; cursor: pointer;
-    font-size: 13px; color: var(--text2); transition: background 0.1s;
-    user-select: none;
+    padding: 8px 12px; background: var(--surface3);
+    border-bottom: 1px solid var(--border2); font-size: 12px; color: var(--text2);
+    cursor: pointer; user-select: none;
   }
-  .channel-opt:hover { background: var(--surface3); color: var(--text); }
-  .channel-opt.selected { background: rgba(201,168,76,0.10); color: var(--text); }
-  .channel-opt .ch-check { width: 16px; height: 16px; border-radius: 4px; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .channel-opt.selected .ch-check { background: var(--gold); border-color: var(--gold-dim); }
-  .channel-opt.selected .ch-check::after { content: '✓'; font-size: 10px; color: var(--bg); font-weight: 700; }
-  .channel-tag {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 3px 10px; background: rgba(201,168,76,0.10);
-    border: 1px solid rgba(88,101,242,0.25); border-radius: 2px;
-    font-size: 12px; color: var(--gold);
+  .am-condition-header:hover { background: rgba(255,255,255,0.04); }
+  .am-condition-header .chevron { font-size: 10px; transition: transform 0.2s; }
+  .am-condition-header.collapsed .chevron { transform: rotate(-90deg); }
+  .am-condition-body { padding: 12px; background: var(--surface2); }
+  .am-condition-body.hidden { display: none; }
+  .am-threshold-row {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 10px; font-size: 13px; color: var(--text2);
   }
-  .channel-tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; }
-  .channel-tag button:hover { color: var(--red); }
+  .am-num-input {
+    width: 60px; background: var(--surface3); border: 1px solid var(--border2);
+    color: var(--text); font-family: 'Crimson Pro', serif; font-size: 13px;
+    padding: 5px 8px; border-radius: 2px; outline: none; text-align: center;
+    -moz-appearance: textfield;
+  }
+  .am-num-input::-webkit-outer-spin-button, .am-num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .am-num-input:focus { border-color: var(--gold); }
+  .am-select {
+    background: var(--surface3); border: 1px solid var(--border2); color: var(--text);
+    font-family: 'Crimson Pro', serif; font-size: 13px; padding: 5px 8px; border-radius: 2px;
+    outline: none; cursor: pointer;
+  }
+  .am-actions-section { border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; }
+  .am-actions-section .add-action-btn {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text3);
+    cursor: pointer; padding: 6px 8px; border-radius: 2px; transition: all 0.15s;
+    border: 1px dashed var(--border2); width: 100%; background: none;
+    font-family: 'Crimson Pro', Georgia, serif;
+  }
+  .am-actions-section .add-action-btn:hover { color: var(--gold-light); border-color: var(--gold-dim); background: rgba(201,168,76,0.04); }
+  .am-action-tag {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; background: rgba(201,168,76,0.08);
+    border: 1px solid var(--gold-dim); border-radius: 2px;
+    font-size: 12px; color: var(--gold); margin: 4px 4px 0 0;
+  }
+  .am-action-tag button { background: none; border: none; color: var(--text3); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
+  .am-action-tag button:hover { color: var(--red-light); }
+  .am-condition-remove {
+    margin-left: auto; background: none; border: none; color: var(--text3);
+    cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px;
+  }
+  .am-condition-remove:hover { color: var(--red-light); }
 
-  /* ═══ REACTION BOARD CARDS ═══ */
+  /* Action picker dropdown */
+  .am-action-picker {
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px;
+    overflow: hidden; margin-bottom: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    position: relative; z-index: 50;
+  }
+  .am-picker-label {
+    padding: 8px 12px; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text3); border-bottom: 1px solid var(--border);
+    font-family: 'Cinzel', serif;
+  }
+  .am-picker-opt { padding: 9px 14px; font-size: 13px; color: var(--text2); cursor: pointer; transition: background 0.1s; }
+  .am-picker-opt:hover { background: var(--surface3); color: var(--text); }
+
+  /* ═══ REACTION BOARD ═══ */
   .board-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 3px;
-    padding: 20px 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 2px;
+    padding: 20px 24px; display: flex; align-items: center; gap: 20px; margin-bottom: 12px;
     transition: border-color 0.2s;
   }
-  .board-card:hover { border-color: var(--border2); }
+  .board-card:hover { border-color: var(--gold-dim); }
   .board-emoji { font-size: 36px; flex-shrink: 0; width: 56px; text-align: center; }
   .board-info { flex: 1; }
-  .board-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .board-name { font-size: 16px; font-weight: 600; margin-bottom: 4px; font-family: 'Cinzel', serif; color: var(--text); }
   .board-meta { font-size: 13px; color: var(--text2); display: flex; gap: 16px; flex-wrap: wrap; }
   .board-meta span { display: flex; align-items: center; gap: 4px; }
   .board-channels { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .board-channel-tag {
     font-size: 12px; padding: 2px 10px;
-    background: rgba(201,168,76,0.08);
-    border: 1px solid var(--gold-dim);
-    border-radius: 2px; color: var(--gold-light);
-    font-family: 'DM Mono', monospace;
+    background: rgba(201,168,76,0.07); border: 1px solid var(--gold-dim);
+    border-radius: 2px; color: var(--gold-light); font-family: 'DM Mono', monospace;
   }
   .board-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .board-empty {
-    text-align: center; padding: 60px 20px;
-    color: var(--text3); font-size: 14px;
-    border: 2px dashed var(--border);
-    border-radius: 3px;
+    text-align: center; padding: 60px 20px; color: var(--text3); font-size: 14px;
+    border: 1px dashed var(--border); border-radius: 2px;
   }
   .board-empty .be-icon { font-size: 40px; margin-bottom: 12px; }
   .board-empty p { margin-bottom: 16px; }
 
-  /* ═══ ESCALATION BUILDER ═══ */
-  .escalation-steps { display: flex; flex-direction: column; gap: 6px; }
-  .escalation-step {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 4px;
+  /* ═══ COMMANDS ═══ */
+  .cmd-group { margin-bottom: 20px; }
+  .cmd-group-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--text3); padding: 6px 0; margin-bottom: 8px;
+    border-bottom: 1px solid var(--border); font-family: 'Cinzel', serif;
   }
-  .escalation-step .step-num {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: var(--gold); color: #fff;
-    font-size: 12px; font-weight: 700;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+  .cmd-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+  .cmd-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; background: var(--surface3); border: 1px solid var(--border2);
+    border-radius: 2px; font-size: 13px; color: var(--text2);
+    font-family: 'DM Mono', monospace; position: relative; cursor: default;
   }
-  .escalation-step .step-label { font-size: 13px; color: var(--text2); width: 80px; flex-shrink: 0; }
-  .escalation-step select, .escalation-step input[type=number] {
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 13px;
-    padding: 5px 10px;
-    border-radius: 3px;
-    outline: none;
+  .cmd-pill:hover { border-color: var(--gold-dim); color: var(--text); }
+  .cmd-help {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: var(--surface2); border: 1px solid var(--border2);
+    font-size: 10px; color: var(--text3); cursor: help;
+    font-family: 'Crimson Pro', serif; font-weight: 700;
   }
-  .escalation-step select:focus, .escalation-step input:focus { border-color: var(--gold); }
-  .escalation-step .step-dur { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text2); }
-  .escalation-step input[type=number] {
-    width: 70px; text-align: center;
-    -moz-appearance: textfield;
+  .cmd-pill:hover .cmd-help { border-color: var(--gold-dim); color: var(--gold); }
+  .cmd-tooltip {
+    display: none; position: absolute; bottom: calc(100% + 6px); left: 0;
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px;
+    padding: 10px 14px; font-size: 12px; color: var(--text2); font-family: 'Crimson Pro', serif;
+    width: 240px; z-index: 100; line-height: 1.5; box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    pointer-events: none;
   }
-  .escalation-step input[type=number]::-webkit-outer-spin-button,
-  .escalation-step input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
-  .escalation-arrow { text-align: center; color: var(--text3); font-size: 16px; }
-  .escalation-save { margin-top: 10px; }
+  .cmd-pill:hover .cmd-tooltip { display: block; }
+  .prefix-tag {
+    display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px;
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 3px;
+    font-size: 15px; font-family: 'DM Mono', monospace; color: var(--gold-light);
+  }
+  .prefix-tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; line-height: 1; }
+  .prefix-tag button:hover { color: var(--red-light); }
 
-  /* ═══ ACTION PICKER ═══ */
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 8px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  /* ═══ CHANNEL PICKER ═══ */
+  .channel-opt {
+    display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: 2px;
+    cursor: pointer; font-size: 13px; color: var(--text2); transition: background 0.1s; user-select: none;
   }
-  .am-picker-label {
-    padding: 8px 12px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text3);
-    border-bottom: 1px solid var(--border);
+  .channel-opt:hover { background: var(--surface3); color: var(--text); }
+  .channel-opt.selected { background: rgba(201,168,76,0.08); color: var(--text); }
+  .channel-opt .ch-check {
+    width: 16px; height: 16px; border-radius: 3px; border: 2px solid var(--border2);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   }
-  .am-picker-opt {
-    padding: 9px 14px;
-    font-size: 13px;
-    color: var(--text2);
-    cursor: pointer;
-    transition: background 0.1s;
+  .channel-opt.selected .ch-check { background: var(--gold); border-color: var(--accent2); }
+  .channel-opt.selected .ch-check::after { content: '✓'; font-size: 10px; color: var(--bg); font-weight: 700; }
+  .channel-tag {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
+    background: rgba(201,168,76,0.08); border: 1px solid var(--gold-dim);
+    border-radius: 2px; font-size: 12px; color: var(--gold); font-family: 'DM Mono', monospace;
   }
-  .am-picker-opt:hover { background: var(--surface3); color: var(--text); }
+  .channel-tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; }
+  .channel-tag button:hover { color: var(--red-light); }
 
-  /* ═══ ROLE PICKER MODAL ═══ */
+  /* ═══ MODALS ═══ */
   .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 1000;
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000;
     display: flex; align-items: center; justify-content: center;
     animation: fadeIn 0.15s ease;
   }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
   .modal {
-    background: var(--surface);
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    width: 480px;
-    max-height: 80vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    background: var(--surface); border: 1px solid var(--border2); border-radius: 2px;
+    width: 480px; max-height: 80vh; display: flex; flex-direction: column;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.7);
     animation: slideUp 0.2s cubic-bezier(0.16,1,0.3,1);
   }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
   .modal-header {
-    padding: 18px 20px;
-    border-bottom: 1px solid var(--border);
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between;
+    background: linear-gradient(90deg, rgba(201,168,76,0.04) 0%, transparent 60%);
   }
-  .modal-header h3 { font-size: 15px; font-weight: 600; }
+  .modal-header h3 { font-size: 15px; font-weight: 700; font-family: 'Cinzel', serif; color: var(--gold-light); }
   .modal-header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
   .modal-close { background: none; border: none; color: var(--text3); font-size: 20px; cursor: pointer; padding: 4px; line-height: 1; }
   .modal-close:hover { color: var(--text); }
   .modal-search { padding: 12px 16px; border-bottom: 1px solid var(--border); }
   .modal-search input {
     width: 100%; background: var(--surface2); border: 1px solid var(--border2);
-    color: var(--text); font-family: 'Crimson Pro', Georgia, serif; font-size: 14px;
-    padding: 8px 12px; border-radius: 4px; outline: none;
+    color: var(--text); font-family: 'Crimson Pro', serif; font-size: 14px;
+    padding: 8px 12px; border-radius: 2px; outline: none;
   }
   .modal-search input:focus { border-color: var(--gold); }
-  .modal-body { flex: 1; overflow-y: auto; padding: 8px; }
-  .role-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 12px; border-radius: 3px; cursor: pointer;
-    transition: background 0.1s; user-select: none;
-  }
-  .role-item:hover { background: var(--surface2); }
-  .role-item.selected { background: rgba(201,168,76,0.10); }
-  .role-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .role-name { font-size: 14px; flex: 1; }
-  .role-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .role-item.selected .role-check { background: var(--gold); border-color: var(--gold-dim); }
-  .role-item.selected .role-check::after { content: '✓'; font-size: 11px; color: var(--bg); font-weight: 700; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 8px; scrollbar-width: thin; }
   .modal-footer {
-    padding: 14px 16px;
-    border-top: 1px solid var(--border);
+    padding: 14px 16px; border-top: 1px solid var(--border);
     display: flex; align-items: center; justify-content: space-between; gap: 10px;
   }
   .modal-footer .selected-count { font-size: 13px; color: var(--text2); }
+  .role-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: 2px; cursor: pointer; transition: background 0.1s; user-select: none;
+  }
+  .role-item:hover { background: var(--surface2); }
+  .role-item.selected { background: rgba(201,168,76,0.07); }
+  .role-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .role-name { font-size: 14px; flex: 1; }
+  .role-check {
+    width: 18px; height: 18px; border-radius: 3px; border: 2px solid var(--border2);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  }
+  .role-item.selected .role-check { background: var(--gold); border-color: var(--accent2); }
+  .role-item.selected .role-check::after { content: '✓'; font-size: 11px; color: var(--bg); font-weight: 700; }
 
-  /* ═══ DEFAULT COMMANDS ═══ */
-  .cmd-group { margin-bottom: 20px; }
-  .cmd-group-title {
-    font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.1em; color: var(--text3);
-    padding: 6px 0; margin-bottom: 6px;
-    border-bottom: 1px solid var(--border);
+  /* ═══ TOAST ═══ */
+  #toasts { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+    background: var(--surface2); border: 1px solid var(--border2); border-radius: 2px;
+    font-size: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    animation: slideInToast 0.3s cubic-bezier(0.16,1,0.3,1);
+    font-family: 'Crimson Pro', serif;
   }
-  .cmd-grid { display: flex; flex-wrap: wrap; gap: 6px; }
-  .cmd-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 12px;
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    font-size: 13px; color: var(--text2);
-    font-family: 'DM Mono', monospace;
-    position: relative;
-  }
-  .cmd-pill:hover { border-color: var(--gold); color: var(--text); }
-  .cmd-help {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 16px; height: 16px; border-radius: 50%;
-    background: var(--surface2); border: 1px solid var(--border2);
-    font-size: 10px; color: var(--text3); cursor: help;
-    font-family: 'Crimson Pro', Georgia, serif; font-weight: 700;
-    flex-shrink: 0;
-  }
-  .cmd-pill:hover .cmd-help { border-color: var(--gold); color: var(--gold); }
-  .cmd-tooltip {
-    display: none;
-    position: absolute; bottom: calc(100% + 6px); left: 0;
-    background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 4px; padding: 10px 14px;
-    font-size: 12px; color: var(--text2); font-family: 'Crimson Pro', Georgia, serif;
-    width: 240px; z-index: 100; line-height: 1.5;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-    pointer-events: none;
-  }
-  .cmd-pill:hover .cmd-tooltip { display: block; }
-
-  /* prefix tags */
-  .prefix-tag {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 6px 12px;
-    background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 4px; font-size: 15px; font-family: 'DM Mono', monospace;
-    color: var(--text);
-  }
-  .prefix-tag button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; line-height: 1; }
-  .prefix-tag button:hover { color: var(--red); }
-
-  /* ═══ CONDITION EDITOR ═══ */
-  .am-condition {
-    display: none;
-    margin-top: 10px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .am-card.active .am-condition { display: block; }
-  .am-condition-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: var(--surface3);
-    border-bottom: 1px solid var(--border2);
-    font-size: 13px;
-    color: var(--text2);
-    cursor: pointer;
-    user-select: none;
-  }
-  .am-condition-header:hover { background: rgba(255,255,255,0.04); }
-  .am-condition-header .chevron { font-size: 10px; transition: transform 0.2s; }
-  .am-condition-header.collapsed .chevron { transform: rotate(-90deg); }
-  .am-condition-body {
-    padding: 12px;
-    background: var(--surface2);
-  }
-  .am-condition-body.hidden { display: none; }
-  .am-threshold-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-    font-size: 13px;
-    color: var(--text2);
-  }
-  .am-threshold-row span { white-space: nowrap; }
-  .am-num-input {
-    width: 60px;
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 13px;
-    padding: 5px 8px;
-    border-radius: 3px;
-    outline: none;
-    text-align: center;
-    -moz-appearance: textfield;
-  }
-  .am-num-input::-webkit-outer-spin-button,
-  .am-num-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .am-num-input:focus { border-color: var(--gold); }
-  .am-select {
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    color: var(--text);
-    font-family: 'Crimson Pro', Georgia, serif;
-    font-size: 13px;
-    padding: 5px 8px;
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-  }
-  .am-actions-section {
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-    margin-top: 4px;
-  }
-  .am-actions-section .add-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: var(--text3);
-    cursor: pointer;
-    padding: 6px 8px;
-    border-radius: 3px;
-    transition: all 0.15s;
-    border: 1px dashed var(--border2);
-    width: 100%;
-    background: none;
-    font-family: 'Crimson Pro', Georgia, serif;
-  }
-  .am-actions-section .add-action-btn:hover { color: var(--gold-light); border-color: var(--gold-dim); background: rgba(201,168,76,0.04); }
-  .am-action-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    background: rgba(201,168,76,0.10);
-    border: 1px solid rgba(88,101,242,0.25);
-    border-radius: 3px;
-    font-size: 12px;
-    color: var(--gold);
-    margin: 4px 4px 0 0;
-  }
-  .am-action-tag button { background: none; border: none; color: var(--text3); cursor: pointer; padding: 0; font-size: 14px; line-height: 1; }
-  .am-action-tag button:hover { color: var(--red); }
-  .am-condition-remove {
-    margin-left: auto;
-    background: none;
-    border: none;
-    color: var(--text3);
-    cursor: pointer;
-    font-size: 16px;
-    line-height: 1;
-    padding: 0 4px;
-  }
-  .am-condition-remove:hover { color: var(--red); }
-
-  /* ═══ AUTO MOD CARDS ═══ */
-  .am-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .am-card {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 3px;
-    padding: 16px;
-    transition: border-color 0.2s;
-  }
-  .am-card.active { border-color: var(--gold); }
-  .am-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
-  .am-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .am-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
-  .am-counter {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text3);
-    background: var(--surface3);
-    border: 1px solid var(--border2);
-    border-radius: 2px;
-    padding: 2px 10px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  .am-card.active .am-counter { color: var(--gold-light); border-color: var(--gold-dim); background: rgba(201,168,76,0.08); }
-  .am-actions { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-  .am-empty { font-size: 12px; color: var(--text3); font-style: italic; text-align: center; padding: 8px 0; border-top: 1px solid var(--border); }
-  .am-card.active .am-empty { color: var(--gold); font-style: normal; }
+  .toast.ok { border-left: 3px solid var(--gold); }
+  .toast.err { border-left: 3px solid var(--red-light); }
+  @keyframes slideInToast { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
 
   /* ═══ EMPTY / LOADING ═══ */
-  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
-  .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; }
-  .loading::after { content: '…'; }
-
-  /* ═══ INFO BOX ═══ */
-  .info {
-    display: flex;
-    gap: 10px;
-    padding: 12px 16px;
-    background: rgba(201,168,76,0.06);
-    border: 1px solid rgba(201,168,76,0.12);
-    border-radius: 4px;
-    font-size: 13px;
-    color: var(--text2);
-    margin-bottom: 20px;
-    line-height: 1.5;
-  }
-  .info-icon { font-size: 16px; flex-shrink: 0; }
+  .empty { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; font-style: italic; }
+  .loading { text-align: center; padding: 40px; color: var(--text3); font-size: 14px; font-style: italic; }
 
   /* ═══ NO SERVER ═══ */
-  .no-server {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 300px;
-    gap: 12px;
-    color: var(--text3);
-  }
+  .no-server { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 300px; gap: 12px; color: var(--text3); }
   .no-server .icon { font-size: 40px; }
   .no-server p { font-size: 14px; }
 </style>
@@ -912,24 +665,22 @@
 
   <!-- SIDEBAR -->
   <nav class="sidebar">
-    <div class="sidebar-top">
-      <!-- Roman brand header -->
-      <div style="text-align:center;padding:16px 12px 12px;border-bottom:1px solid var(--border)">
-        <div style="font-family:'Cinzel',serif;font-size:18px;font-weight:900;letter-spacing:0.12em;color:var(--gold-light);line-height:1">PRIME</div>
-        <div style="font-size:9px;letter-spacing:0.25em;color:var(--gold-dim);text-transform:uppercase;font-family:'Cinzel',serif;margin-top:2px">Command Center</div>
-        <div style="color:var(--gold-dim);font-size:12px;letter-spacing:0.3em;margin-top:6px">⸻ ✦ ⸻</div>
+    <div class="sidebar-brand">
+      <div class="brand-title">PRIME</div>
+      <span class="brand-subtitle">Command Center</span>
+      <div class="brand-divider">⸻ ✦ ⸻</div>
+    </div>
+
+    <div class="sidebar-server">
+      <div class="server-chip">
+        <div class="s-icon">💀</div>
+        <span class="s-name" id="sName">PrimeLooks</span>
+        <span class="s-arrow">▾</span>
       </div>
-      <div style="padding:10px 12px 0">
-        <div class="server-chip">
-          <div class="s-icon">💀</div>
-          <span class="s-name" id="sName">PrimeLooks</span>
-          <span class="s-arrow">▾</span>
-        </div>
-        <div class="guild-select-wrap">
-          <select id="guildSelect" onchange="onGuildChange()">
-            <option value="">Choose server…</option>
-          </select>
-        </div>
+      <div class="guild-select-wrap">
+        <select id="guildSelect" onchange="onGuildChange()">
+          <option value="">Choose server…</option>
+        </select>
       </div>
     </div>
 
@@ -964,7 +715,7 @@
 
     <div class="sidebar-footer">
       <div class="user-bar">
-        <img id="uAvatar" src="" alt="">
+        <img id="uAvatar" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="">
         <div>
           <div class="uname" id="uName">Loading…</div>
         </div>
@@ -980,6 +731,9 @@
         <h1 id="pageTitle">Home</h1>
         <span class="sep">›</span>
         <span class="sub" id="pageSub">Dashboard</span>
+      </div>
+      <div class="topbar-ornament">
+        <span>S·P·Q·R</span>
       </div>
     </div>
 
@@ -1030,16 +784,15 @@
             <div class="mc-desc">Adjust XP rates, pic perms roles, spam limits, and more.</div>
             <span class="mc-btn">Open settings →</span>
           </div>
-          <div class="module-card" style="cursor:default;opacity:0.4">
+          <div class="module-card" style="cursor:default;opacity:0.35">
             <span class="mc-icon">📊</span>
-            <div class="mc-title">Analytics <span style="font-size:11px;color:var(--text3);font-weight:400">(coming soon)</span></div>
+            <div class="mc-title">Analytics <span style="font-size:11px;color:var(--text3);font-weight:400;font-family:'Crimson Pro',serif">(coming soon)</span></div>
             <div class="mc-desc">Detailed message activity, join trends, and member insights.</div>
             <span class="mc-btn">Coming soon</span>
           </div>
         </div>
 
-        <!-- 7-day chart -->
-        <div class="card" style="margin-top:24px" id="chartCard">
+        <div class="card" style="margin-top:24px">
           <div class="card-header">
             <div>
               <h3>7-Day Member Activity</h3>
@@ -1067,19 +820,13 @@
           <button class="btn btn-primary" onclick="saveAutomod()">Save Changes</button>
         </div>
 
-        <!-- CENSORED WORDS -->
         <div class="card">
           <div class="card-header"><div><h3>🚫 Censored Words</h3><p>Messages containing these words are deleted and escalated</p></div></div>
           <div class="card-body">
-
-            <!-- ESCALATION BUILDER -->
             <div style="margin-bottom:20px">
-              <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.08em;">Escalation Order</div>
-              <div class="escalation-steps" id="escalationSteps">
-                <!-- Steps rendered by JS -->
-              </div>
+              <div style="font-size:10px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.12em;font-family:'Cinzel',serif">Escalation Order</div>
+              <div class="escalation-steps" id="escalationSteps"></div>
             </div>
-
             <div class="row">
               <div class="field"><label>Word or Phrase</label><input type="text" id="cWord" placeholder="e.g. badword"></div>
               <div class="field" style="max-width:140px"><label>Action</label>
@@ -1103,188 +850,11 @@
           </div>
         </div>
 
-        <!-- ADVANCED AUTO MOD -->
         <div class="card">
           <div class="card-header"><div><h3>⚡ Advanced Auto Moderation</h3><p>Toggle automatic actions for common spam and abuse patterns</p></div></div>
           <div class="card-body">
-            <div class="am-grid">
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Spam</div>
-                    <div class="am-desc">Take actions when a user sends messages too fast.</div>
-                  </div>
-                  <div class="am-counter" id="am-count-spam">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_spam','Spam','Roles exempt from spam detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_spam')">Add condition</button>
-                </div>
-                <div class="am-empty" id="am-empty-spam">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_spam" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Channel Spam</div>
-                    <div class="am-desc">Take actions when a user sends messages across multiple channels too fast.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_channelSpam','Channel Spam','Roles exempt from channel spam detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_channelSpam')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_channelSpam" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Mentions</div>
-                    <div class="am-desc">Take actions when a user mentions too many users in a short time.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_mentions','Mentions','Roles exempt from mention spam detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_mentions')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_mentions" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Attachments</div>
-                    <div class="am-desc">Take actions when a user sends too many attachments in a short time.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_attachments','Attachments','Roles exempt from attachment spam detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_attachments')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_attachments" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Emojis</div>
-                    <div class="am-desc">Take actions when a user sends too many emojis in a short time.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_emojis','Emojis','Roles exempt from emoji spam detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_emojis')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_emojis" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Message Lines</div>
-                    <div class="am-desc">Take actions when a user sends too many message lines (large messages) in a short time.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_messageLines','Message Lines','Roles exempt from message line detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_messageLines')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_messageLines" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Capitalization</div>
-                    <div class="am-desc">Take actions when a user's message has too many capitalized letters.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_caps','Capitalization','Roles exempt from caps detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_caps')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_caps" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Words</div>
-                    <div class="am-desc">Take actions when a user's message includes certain words.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_words','Words','Roles exempt from word filter')">Manage roles and channels</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_words')">Add group</button>
-                </div>
-                <div class="am-empty">No words set · Start by adding a group</div>
-                <input type="hidden" data-key="am_words" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Links</div>
-                    <div class="am-desc">Take actions when a user's message includes links.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_links','Links','Roles exempt from link detection')">Manage roles and channels</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_links')">Add group</button>
-                </div>
-                <div class="am-empty">No links set · Start by adding a group</div>
-                <input type="hidden" data-key="am_links" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Discord Invites</div>
-                    <div class="am-desc">Take actions when a user's message includes a Discord invite.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_invites','Discord Invites','Roles exempt from invite detection')">Manage roles and channels</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_invites')">Add group</button>
-                </div>
-                <div class="am-empty">No invites set · Start by adding a group</div>
-                <input type="hidden" data-key="am_invites" value="false">
-              </div>
-
-              <div class="am-card">
-                <div class="am-top">
-                  <div>
-                    <div class="am-title">Polls</div>
-                    <div class="am-desc">Take actions when a user's message includes a native Discord poll.</div>
-                  </div>
-                  <div class="am-counter">0 / 10</div>
-                </div>
-                <div class="am-actions">
-                  <button class="btn btn-ghost btn-sm" onclick="openRoleModal('am_polls','Polls','Roles exempt from poll detection')">Manage roles</button>
-                  <button class="btn btn-primary btn-sm" onclick="toggleAmCard(this, 'am_polls')">Add condition</button>
-                </div>
-                <div class="am-empty">No actions set · Start by adding a condition</div>
-                <input type="hidden" data-key="am_polls" value="false">
-              </div>
-
+            <div class="am-grid" id="amGrid">
+              <!-- Cards injected by JS via initAmCards() -->
             </div>
           </div>
         </div>
@@ -1311,12 +881,8 @@
           <div><h2>Reaction Board</h2><p>Feature messages when they reach a reaction threshold</p></div>
           <button class="btn btn-primary" onclick="openBoardModal()">+ New Board</button>
         </div>
-
         <div class="info"><span class="info-icon">⭐</span> Each board watches for a specific reaction emoji. When a message hits your threshold it gets posted to your chosen channel(s). You can have multiple boards with different emojis.</div>
-
-        <div id="boardList">
-          <div class="loading">Loading boards</div>
-        </div>
+        <div id="boardList"><div class="loading">Loading boards</div></div>
       </div>
 
       <!-- BOARD MODAL -->
@@ -1330,8 +896,7 @@
               </div>
               <button class="modal-close" onclick="closeBoardModal()">×</button>
             </div>
-            <div class="modal-body" style="padding:20px;overflow-y:auto;max-height:60vh;scrollbar-width:none">
-
+            <div class="modal-body" style="padding:20px;overflow-y:auto;max-height:60vh">
               <div class="field">
                 <label>Reaction Emoji</label>
                 <div style="display:flex;gap:8px;align-items:center">
@@ -1339,12 +904,10 @@
                   <span style="font-size:13px;color:var(--text3)">Paste any emoji or type it</span>
                 </div>
               </div>
-
               <div class="field">
                 <label>Board Name</label>
                 <input type="text" id="b_name" placeholder="e.g. Skullboard, Hall of Fame…">
               </div>
-
               <div class="field">
                 <label>Reaction Threshold</label>
                 <div style="display:flex;gap:8px;align-items:center">
@@ -1352,19 +915,17 @@
                   <span style="font-size:13px;color:var(--text2)">reactions needed to feature</span>
                 </div>
               </div>
-
               <div class="field">
                 <label>Post to Channel(s)</label>
                 <div style="font-size:12px;color:var(--text3);margin-bottom:8px">Click to select channels</div>
-                <div id="b_channelList" style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;max-height:160px;overflow-y:auto;scrollbar-width:thin">
+                <div id="b_channelList" style="background:var(--surface2);border:1px solid var(--border2);border-radius:3px;max-height:160px;overflow-y:auto">
                   <div class="loading" style="padding:12px">Loading channels…</div>
                 </div>
                 <div id="b_selectedChannels" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"></div>
               </div>
-
               <div class="field">
                 <label>Options</label>
-                <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;flex-direction:column;gap:10px">
                   <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:14px;color:var(--text2);text-transform:none;letter-spacing:0">
                     <div class="toggle" onclick="flipToggle(this)" data-key="b_selfReact" data-on="false" style="flex-shrink:0"><div class="toggle-thumb"></div></div>
                     Allow users to react to their own messages
@@ -1379,7 +940,6 @@
                   </label>
                 </div>
               </div>
-
             </div>
             <div class="modal-footer">
               <span class="selected-count" id="boardEditId"></span>
@@ -1413,13 +973,12 @@
           <div><h2>Commands</h2><p>Manage custom commands, default commands and prefixes</p></div>
         </div>
 
-        <!-- CUSTOM COMMANDS -->
         <div class="card" style="margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px">
             <div style="display:flex;align-items:center;gap:14px">
               <span style="font-size:22px">↪</span>
               <div>
-                <div style="font-size:15px;font-weight:600">Custom commands</div>
+                <div style="font-size:15px;font-weight:600;font-family:'Cinzel',serif;color:var(--text)">Custom commands</div>
                 <div style="font-size:13px;color:var(--text2)">Create and manage your own commands.</div>
               </div>
             </div>
@@ -1427,39 +986,33 @@
           </div>
         </div>
 
-        <!-- DEFAULT COMMANDS -->
         <div class="card" style="margin-bottom:12px">
           <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;cursor:pointer" onclick="toggleDefaultCommands()">
             <div style="display:flex;align-items:center;gap:14px">
               <span style="font-size:22px">📋</span>
               <div>
-                <div style="font-size:15px;font-weight:600">Default commands</div>
-                <div style="font-size:13px;color:var(--text2)">Update permissions, aliases and more for all default commands.<br>You can also enable/disable slash commands here.</div>
+                <div style="font-size:15px;font-weight:600;font-family:'Cinzel',serif;color:var(--text)">Default commands</div>
+                <div style="font-size:13px;color:var(--text2)">Update permissions, aliases and more for all default commands.</div>
               </div>
             </div>
             <span id="defaultCmdArrow" style="color:var(--text3);font-size:13px;transition:transform 0.2s">▾</span>
           </div>
           <div id="defaultCmdsBody" style="display:none;border-top:1px solid var(--border);padding:20px">
-
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-              <div style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="cmdSearch" placeholder="Search commands…" oninput="filterDefaultCmds()"
-                  style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Crimson Pro',serif;font-size:13px;padding:7px 12px;border-radius:8px;outline:none;width:220px">
-              </div>
+              <input type="text" id="cmdSearch" placeholder="Search commands…" oninput="filterDefaultCmds()"
+                style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Crimson Pro',serif;font-size:13px;padding:7px 12px;border-radius:2px;outline:none;width:220px">
               <span style="font-size:12px;color:var(--text3)" id="cmdCount"></span>
             </div>
-
             <div id="defaultCmdList"></div>
           </div>
         </div>
 
-        <!-- PREFIXES -->
-        <div class="card" style="margin-bottom:24px">
+        <div class="card" style="margin-bottom:12px">
           <div style="padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between">
             <div>
               <div style="display:flex;align-items:center;gap:10px">
-                <span style="font-size:15px;font-weight:600">Prefixes</span>
-                <span id="prefixCount" style="font-size:12px;font-weight:600;padding:2px 8px;background:var(--surface3);border-radius:20px;color:var(--text2)">0/5</span>
+                <span style="font-size:15px;font-weight:600;font-family:'Cinzel',serif;color:var(--text)">Prefixes</span>
+                <span id="prefixCount" style="font-size:11px;font-weight:600;padding:2px 8px;background:var(--surface3);border-radius:20px;color:var(--text2);border:1px solid var(--border2)">0/5</span>
               </div>
               <div style="font-size:13px;color:var(--text2);margin-top:3px">Put one of the following prefixes in front of your message to execute bot commands.</div>
             </div>
@@ -1472,30 +1025,14 @@
           </div>
         </div>
 
-        <!-- ERROR MESSAGES -->
-        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:12px">Error Messages</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:var(--text3);margin-bottom:12px;font-family:'Cinzel',serif">Error Messages</div>
         <div class="card">
           <div class="card-body" style="padding:0">
-            <div class="toggle-row">
-              <div class="tr-text"><div class="tr-title">Command not found</div><div class="tr-desc">Sent when an executed command doesn't exist.</div></div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="cmdNotFound" data-on="true"><div class="toggle-thumb"></div></div>
-            </div>
-            <div class="toggle-row">
-              <div class="tr-text"><div class="tr-title">Wrong command usage</div><div class="tr-desc">Sent when an existing command is used incorrectly.</div></div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="wrongUsage" data-on="true"><div class="toggle-thumb"></div></div>
-            </div>
-            <div class="toggle-row">
-              <div class="tr-text"><div class="tr-title">No command permissions</div><div class="tr-desc">Sent when an unpermitted user is executing an existing command. If disabled, "Command not found" will be sent instead.</div></div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="noPermissions" data-on="true"><div class="toggle-thumb"></div></div>
-            </div>
-            <div class="toggle-row">
-              <div class="tr-text"><div class="tr-title">Disabled in channel</div><div class="tr-desc">Sent when an existing command is executed in a channel where it's disabled.</div></div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="disabledInChannel" data-on="false"><div class="toggle-thumb"></div></div>
-            </div>
-            <div class="toggle-row" style="border-bottom:none">
-              <div class="tr-text"><div class="tr-title">Command on cooldown</div><div class="tr-desc">Sent when an existing command is executed while the user is on cooldown.</div></div>
-              <div class="toggle" onclick="flipToggle(this)" data-key="onCooldown" data-on="true"><div class="toggle-thumb"></div></div>
-            </div>
+            <div class="toggle-row"><div class="tr-text"><div class="tr-title">Command not found</div><div class="tr-desc">Sent when an executed command doesn't exist.</div></div><div class="toggle" onclick="flipToggle(this)" data-key="cmdNotFound" data-on="true"><div class="toggle-thumb"></div></div></div>
+            <div class="toggle-row"><div class="tr-text"><div class="tr-title">Wrong command usage</div><div class="tr-desc">Sent when an existing command is used incorrectly.</div></div><div class="toggle" onclick="flipToggle(this)" data-key="wrongUsage" data-on="true"><div class="toggle-thumb"></div></div></div>
+            <div class="toggle-row"><div class="tr-text"><div class="tr-title">No command permissions</div><div class="tr-desc">Sent when an unpermitted user is executing an existing command.</div></div><div class="toggle" onclick="flipToggle(this)" data-key="noPermissions" data-on="true"><div class="toggle-thumb"></div></div></div>
+            <div class="toggle-row"><div class="tr-text"><div class="tr-title">Disabled in channel</div><div class="tr-desc">Sent when an existing command is executed in a channel where it's disabled.</div></div><div class="toggle" onclick="flipToggle(this)" data-key="disabledInChannel" data-on="false"><div class="toggle-thumb"></div></div></div>
+            <div class="toggle-row" style="border-bottom:none"><div class="tr-text"><div class="tr-title">Command on cooldown</div><div class="tr-desc">Sent when an existing command is executed while the user is on cooldown.</div></div><div class="toggle" onclick="flipToggle(this)" data-key="onCooldown" data-on="true"><div class="toggle-thumb"></div></div></div>
           </div>
         </div>
         <div style="margin-top:12px;text-align:right">
@@ -1515,7 +1052,7 @@
               <div class="field">
                 <label>New Prefix</label>
                 <input type="text" id="newPrefixInput" placeholder="e.g. ! or ?" maxlength="10"
-                  style="font-size:18px;text-align:center;letter-spacing:0.1em"
+                  style="font-size:20px;text-align:center;letter-spacing:0.15em"
                   onkeydown="if(event.key==='Enter')addPrefix()">
               </div>
             </div>
@@ -1533,29 +1070,17 @@
       <!-- SETTINGS -->
       <div id="page-settings" class="page">
         <div class="section-header">
-          <div><h2>Settings</h2><p>Configure bot behaviour — some require a restart</p></div>
+          <div><h2>Settings</h2><p>Configure bot behaviour for your server</p></div>
           <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
         </div>
-
         <div class="settings-grid">
           <div class="card">
             <div class="card-header"><div><h3>🛡️ Pic Perms</h3></div></div>
             <div class="card-body">
-              <div class="field">
-                <label>Pic Perms Role</label>
-                <select id="s_picPermsRole" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:9px 12px;border-radius:8px;outline:none;width:100%">
-                  <option value="">Loading roles…</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Exempt Role (no pic perms ever)</label>
-                <select id="s_picPermsExempt" style="background:var(--surface2);border:1px solid var(--border2);color:var(--text);font-family:'Crimson Pro',serif;font-size:14px;padding:9px 12px;border-radius:8px;outline:none;width:100%">
-                  <option value="">Loading roles…</option>
-                </select>
-              </div>
+              <div class="field"><label>Pic Perms Role</label><select id="s_picPermsRole"><option value="">Loading roles…</option></select></div>
+              <div class="field"><label>Exempt Role (no pic perms ever)</label><select id="s_picPermsExempt"><option value="">Loading roles…</option></select></div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-header"><div><h3>📈 XP & Leveling</h3></div></div>
             <div class="card-body">
@@ -1563,7 +1088,6 @@
               <div class="field"><label>XP Cooldown (ms)</label><input type="number" id="s_cooldownMs" min="0"></div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-header"><div><h3>🤖 Anti-Spam</h3></div></div>
             <div class="card-body">
@@ -1571,7 +1095,6 @@
               <div class="field"><label>Escalation Alert Username</label><input type="text" id="s_escalationUser" placeholder="returningchad"></div>
             </div>
           </div>
-
           <div class="card">
             <div class="card-header"><div><h3>💀 Skullboard</h3></div></div>
             <div class="card-body">
@@ -1581,15 +1104,15 @@
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
 
 <div id="toasts"></div>
 
 <!-- ROLE PICKER MODAL -->
 <div id="roleModal" style="display:none">
-  <div class="modal-overlay" onclick="closeRoleModal(event)">
+  <div class="modal-overlay" onclick="if(event.target===this)closeRoleModal()">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
         <div>
@@ -1598,9 +1121,7 @@
         </div>
         <button class="modal-close" onclick="closeRoleModal()">×</button>
       </div>
-      <div class="modal-search">
-        <input type="text" id="roleSearch" placeholder="Search roles…" oninput="filterRoles()">
-      </div>
+      <div class="modal-search"><input type="text" id="roleSearch" placeholder="Search roles…" oninput="filterRoles()"></div>
       <div class="modal-body" id="roleList"></div>
       <div class="modal-footer">
         <span class="selected-count" id="selectedCount">0 roles selected</span>
@@ -1620,41 +1141,47 @@
 let guildId = null;
 
 const PAGE_INFO = {
-  home:        ['Home',         'Dashboard'],
-  automod:     ['Auto Moderation', 'Censored words & escalation'],
-  warnings:    ['Warnings',     'Member warning counts'],
-  reactionboard:['Reaction Board', 'Featured message boards'],
-  leaderboard: ['Leaderboard',  'XP rankings'],
-  commands:    ['Commands',     'Error message settings'],
+  home:          ['Home',            'Dashboard'],
+  automod:       ['Auto Moderation', 'Censored words & escalation'],
+  warnings:      ['Warnings',        'Member warning counts'],
+  reactionboard: ['Reaction Board',  'Featured message boards'],
+  leaderboard:   ['Leaderboard',     'XP rankings'],
+  commands:      ['Commands',        'Error message settings'],
+  settings:      ['Settings',        'Bot configuration'],
 };
 
 // ═══════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════
 (async () => {
-  const res = await fetch('/api/me');
-  if (!res.ok) { location.href = '/'; return; }
-  const { user, guilds } = await res.json();
+  initAmCards();
+  initConditionEditors();
 
-  document.getElementById('uName').textContent     = user.username;
-  document.getElementById('welcomeName').textContent = user.username;
-  const av = user.avatar
-    ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
-    : `https://cdn.discordapp.com/embed/avatars/0.png`;
-  document.getElementById('uAvatar').src = av;
+  try {
+    const res = await fetch('/api/me');
+    if (!res.ok) { location.href = '/'; return; }
+    const { user, guilds } = await res.json();
 
-  const sel = document.getElementById('guildSelect');
-  guilds
-    .filter(g => (parseInt(g.permissions) & 0x8) === 0x8)
-    .forEach(g => {
-      const o = document.createElement('option');
-      o.value = g.id; o.textContent = g.name;
-      sel.appendChild(o);
-    });
+    document.getElementById('uName').textContent      = user.username;
+    document.getElementById('welcomeName').textContent = user.username;
+    const av = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+      : `https://cdn.discordapp.com/embed/avatars/0.png`;
+    document.getElementById('uAvatar').src = av;
+
+    const sel = document.getElementById('guildSelect');
+    guilds
+      .filter(g => (parseInt(g.permissions) & 0x8) === 0x8)
+      .forEach(g => {
+        const o = document.createElement('option');
+        o.value = g.id; o.textContent = g.name;
+        sel.appendChild(o);
+      });
+  } catch (e) { console.warn('Not logged in, running in preview mode'); }
 })();
 
 // ═══════════════════════════════════════
-// NAVIGATION
+// NAV
 // ═══════════════════════════════════════
 function nav(el) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -1676,13 +1203,13 @@ function onGuildChange() {
 }
 
 function loadPage(p) {
-  if (p === 'home')        loadHome();
-  if (p === 'automod')     loadAutomod();
-  if (p === 'warnings')    loadWarnings();
+  if (p === 'home')          loadHome();
+  if (p === 'automod')       loadAutomod();
+  if (p === 'warnings')      loadWarnings();
   if (p === 'reactionboard') loadReactionBoard();
-  if (p === 'leaderboard') loadLeaderboard();
-  if (p === 'commands')    loadCommands();
-  if (p === 'settings')    loadSettings();
+  if (p === 'leaderboard')   loadLeaderboard();
+  if (p === 'commands')      loadCommands();
+  if (p === 'settings')      loadSettings();
 }
 
 // ═══════════════════════════════════════
@@ -1691,7 +1218,9 @@ function loadPage(p) {
 async function loadHome() {
   if (!guildId) return;
   const [cWords, settings, warnings] = await Promise.all([
-    api(`/api/censored?guildId=${guildId}`), api(`/api/settings?guildId=${guildId}`), api(`/api/warnings?guildId=${guildId}`)
+    api(`/api/censored?guildId=${guildId}`),
+    api(`/api/settings?guildId=${guildId}`),
+    api(`/api/warnings?guildId=${guildId}`)
   ]);
   document.getElementById('st-censored').textContent = Array.isArray(cWords) ? cWords.length : '—';
   document.getElementById('st-skull').textContent    = settings?.skullThreshold ?? '—';
@@ -1722,128 +1251,188 @@ function renderChart(rows) {
 // ═══════════════════════════════════════
 // AUTO MOD
 // ═══════════════════════════════════════
-function toggleDur() {
-  document.getElementById('durWrap').style.display =
-    document.getElementById('cAction').value === 'mute' ? '' : 'none';
-}
-toggleDur();
+const AM_CONFIGS = [
+  { key:'am_spam',         title:'Spam',            desc:'Take actions when a user sends messages too fast.' },
+  { key:'am_channelSpam',  title:'Channel Spam',    desc:'Take actions when a user spams across multiple channels.' },
+  { key:'am_mentions',     title:'Mentions',        desc:'Take actions when a user mentions too many users quickly.' },
+  { key:'am_attachments',  title:'Attachments',     desc:'Take actions when a user sends too many attachments.' },
+  { key:'am_emojis',       title:'Emojis',          desc:'Take actions when a user sends too many emojis.' },
+  { key:'am_messageLines', title:'Message Lines',   desc:'Take actions when a user sends overly large messages.' },
+  { key:'am_caps',         title:'Capitalization',  desc:'Take actions when a message has too many capital letters.' },
+  { key:'am_words',        title:'Words',           desc:'Take actions when a message includes certain words.' },
+  { key:'am_links',        title:'Links',           desc:'Take actions when a message includes links.' },
+  { key:'am_invites',      title:'Discord Invites', desc:'Take actions when a message includes a Discord invite.' },
+  { key:'am_polls',        title:'Polls',           desc:'Take actions when a message includes a native Discord poll.' },
+];
 
-async function loadAutomod() {
-  const [words, s] = await Promise.all([api(`/api/censored?guildId=${guildId}`), api(`/api/settings?guildId=${guildId}`)]);
-  renderCensor(words || []);
-  loadEscalation();
-  const am = s?.automod || {};
-  document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
-    const key = inp.dataset.key;
-    const val = am[key] === true;
-    inp.value = String(val);
-    const card = inp.closest('.am-card');
-    if (val) {
-      card.classList.add('active');
-      card.querySelector('.am-empty').textContent = '✓ Enabled';
-      const counter = card.querySelector('.am-counter');
-      counter.textContent = '1 / 10';
-    }
-  });
+function initAmCards() {
+  const grid = document.getElementById('amGrid');
+  if (!grid) return;
+  grid.innerHTML = AM_CONFIGS.map(cfg => `
+    <div class="am-card" data-amkey="${cfg.key}">
+      <div class="am-top">
+        <div>
+          <div class="am-title">${cfg.title}</div>
+          <div class="am-desc">${cfg.desc}</div>
+        </div>
+        <div class="am-counter">0 / 10</div>
+      </div>
+      <div class="am-actions">
+        <button class="btn btn-ghost btn-sm" onclick="openRoleModal('${cfg.key}','${cfg.title}','Roles exempt from ${cfg.title.toLowerCase()} detection')">Manage roles</button>
+        <button class="btn btn-primary btn-sm" data-addcond onclick="toggleAmCard(this,'${cfg.key}')">Add condition</button>
+      </div>
+      <div class="am-empty">No actions set · Start by adding a condition</div>
+      <input type="hidden" data-key="${cfg.key}" value="false">
+    </div>`).join('');
+}
+
+const AM_CONDITION_CONFIGS = {
+  am_spam:        { label: 'messages in', unit: 'seconds' },
+  am_channelSpam: { label: 'channels in', unit: 'seconds' },
+  am_mentions:    { label: 'mentions in', unit: 'seconds' },
+  am_attachments: { label: 'attachments in', unit: 'seconds' },
+  am_emojis:      { label: 'emojis in', unit: 'seconds' },
+  am_messageLines:{ label: 'lines in', unit: 'seconds' },
+  am_caps:        { label: '% caps minimum', unit: '' },
+  am_words:       { label: 'matches in', unit: 'seconds' },
+  am_links:       { label: 'links in', unit: 'seconds' },
+  am_invites:     { label: 'invites in', unit: 'seconds' },
+  am_polls:       { label: 'polls in', unit: 'seconds' },
+};
+
+function initConditionEditors() {
+  // Must run after initAmCards
+  setTimeout(() => {
+    document.querySelectorAll('.am-card').forEach(card => {
+      const inp = card.querySelector('input[data-key]');
+      if (!inp) return;
+      const key = inp.dataset.key;
+      const cfg = AM_CONDITION_CONFIGS[key] || { label: 'in', unit: 'seconds' };
+      const timeInput = cfg.unit ? `<input type="number" class="am-num-input" value="5" min="1" data-field="time" oninput="updateCondLabel(this)"><span>${cfg.unit}</span>` : '';
+      const condHTML = `
+        <div class="am-condition">
+          <div class="am-condition-header" onclick="toggleConditionBody(this)">
+            <span class="chevron">▾</span>
+            <span class="am-cond-label">≥ <span class="thresh-display">3</span> ${cfg.label}${cfg.unit ? ' <span class="time-display">5</span> ' + cfg.unit : ''}</span>
+            <button class="am-condition-remove" onclick="event.stopPropagation();toggleAmCard(card.querySelector('[data-addcond]'),'${key}')" title="Remove">×</button>
+          </div>
+          <div class="am-condition-body">
+            <div class="am-threshold-row">
+              <span>≥</span>
+              <input type="number" class="am-num-input" value="3" min="1" max="100" data-field="threshold" oninput="updateCondLabel(this)">
+              <span>${cfg.label}</span>
+              ${timeInput}
+            </div>
+            <div class="am-actions-section">
+              <div class="am-actions-taken" style="margin-bottom:6px"></div>
+              <button class="add-action-btn" onclick="addAction(this,'${key}')">+ No actions added — click to add</button>
+            </div>
+          </div>
+        </div>`;
+      card.insertAdjacentHTML('beforeend', condHTML);
+    });
+  }, 0);
+}
+
+function updateCondLabel(input) {
+  const body   = input.closest('.am-condition-body');
+  const header = body.previousElementSibling;
+  const thresh = body.querySelector('[data-field=threshold]')?.value || '3';
+  const timeEl = body.querySelector('[data-field=time]');
+  const thDisp = header.querySelector('.thresh-display');
+  const tmDisp = header.querySelector('.time-display');
+  if (thDisp) thDisp.textContent = thresh;
+  if (tmDisp && timeEl) tmDisp.textContent = timeEl.value;
+}
+
+function toggleConditionBody(header) {
+  header.classList.toggle('collapsed');
+  header.nextElementSibling.classList.toggle('hidden');
 }
 
 function toggleAmCard(btn, key) {
-  const card = btn.closest('.am-card');
+  const card = btn.closest ? btn.closest('.am-card') : document.querySelector(`.am-card[data-amkey="${key}"]`);
+  if (!card) return;
   const inp  = card.querySelector(`input[data-key="${key}"]`);
   const isOn = inp.value === 'true';
-
+  const addBtn = card.querySelector('[data-addcond]');
   if (!isOn) {
     inp.value = 'true';
     card.classList.add('active');
-    const empty = card.querySelector('.am-empty');
-    if (empty) empty.style.display = 'none';
+    card.querySelector('.am-empty').style.display = 'none';
     card.querySelector('.am-counter').textContent = '1 / 10';
-    btn.textContent = 'Remove Conditions';
-    btn.classList.remove('btn-primary');
-    btn.classList.add('btn-danger');
+    if (addBtn) { addBtn.textContent = 'Remove'; addBtn.classList.replace('btn-primary','btn-danger'); }
     const cond = card.querySelector('.am-condition');
     if (cond) cond.style.display = 'block';
   } else {
     inp.value = 'false';
     card.classList.remove('active');
-    const empty = card.querySelector('.am-empty');
-    if (empty) empty.style.display = '';
+    card.querySelector('.am-empty').style.display = '';
     card.querySelector('.am-counter').textContent = '0 / 10';
-    btn.textContent = 'Add condition';
-    btn.classList.remove('btn-danger');
-    btn.classList.add('btn-primary');
+    if (addBtn) { addBtn.textContent = 'Add condition'; addBtn.classList.replace('btn-danger','btn-primary'); }
     const cond = card.querySelector('.am-condition');
     if (cond) cond.style.display = 'none';
   }
 }
 
-function toggleConditionBody(header) {
-  header.classList.toggle('collapsed');
-  const body = header.nextElementSibling;
-  body.classList.toggle('hidden');
-}
-
 function addAction(btn, key) {
-  const card    = btn.closest('.am-card');
-  const actions = card.querySelector('.am-actions-taken');
-  const existing = Array.from(actions.querySelectorAll('.am-action-tag')).map(t => t.dataset.action);
-
-  const ALL_ACTIONS = [
-    'Delete message', 'Warn user', 'Mute user', 'Kick user', 'Ban user',
-    'Report to moderators', 'DM user', 'Open moderation case', 'Add reactions', 'Add roles'
-  ];
-  const available = ALL_ACTIONS.filter(a => !existing.includes(a));
-  if (!available.length) { toast('All actions already added', true); return; }
-
-  // Remove any existing picker
+  const card     = btn.closest('.am-card');
+  const taken    = card.querySelector('.am-actions-taken');
+  const existing = Array.from(taken.querySelectorAll('.am-action-tag')).map(t => t.dataset.action);
+  const ALL = ['Delete message','Warn user','Mute user','Kick user','Ban user','Report to moderators','DM user','Open moderation case','Add reactions','Add roles'];
+  const avail = ALL.filter(a => !existing.includes(a));
+  if (!avail.length) { toast('All actions already added', true); return; }
   card.querySelector('.am-action-picker')?.remove();
-
   const picker = document.createElement('div');
   picker.className = 'am-action-picker';
-  picker.innerHTML = `
-    <div class="am-picker-label">Action</div>
-    ${available.map(a => `<div class="am-picker-opt" onclick="selectAction(this,'${a}','${key}')">${a}</div>`).join('')}
-  `;
+  picker.innerHTML = `<div class="am-picker-label">Choose Action</div>` +
+    avail.map(a => `<div class="am-picker-opt" onclick="selectAction(this,'${a}','${key}')">${a}</div>`).join('');
   btn.insertAdjacentElement('beforebegin', picker);
-
-  // Close on outside click
   setTimeout(() => {
-    document.addEventListener('click', function closePicker(e) {
-      if (!picker.contains(e.target) && e.target !== btn) {
-        picker.remove();
-        document.removeEventListener('click', closePicker);
-      }
+    document.addEventListener('click', function cp(e) {
+      if (!picker.contains(e.target) && e.target !== btn) { picker.remove(); document.removeEventListener('click', cp); }
     });
   }, 10);
 }
 
 function selectAction(opt, action, key) {
-  const card    = opt.closest('.am-card');
-  const actions = card.querySelector('.am-actions-taken');
+  const card  = opt.closest('.am-card');
+  const taken = card.querySelector('.am-actions-taken');
   opt.closest('.am-action-picker').remove();
-
   const tag = document.createElement('div');
-  tag.className    = 'am-action-tag';
-  tag.dataset.action = action;
-  tag.innerHTML    = `${action} <button onclick="this.closest('.am-action-tag').remove()" title="Remove">×</button>`;
-  actions.appendChild(tag);
+  tag.className = 'am-action-tag'; tag.dataset.action = action;
+  tag.innerHTML = `${action} <button onclick="this.closest('.am-action-tag').remove()" title="Remove">×</button>`;
+  taken.appendChild(tag);
 }
 
+function toggleDur() {
+  document.getElementById('durWrap').style.display = document.getElementById('cAction').value === 'mute' ? '' : 'none';
+}
+toggleDur();
+
+async function loadAutomod() {
+  if (!guildId) return;
+  const [words, s] = await Promise.all([
+    api(`/api/censored?guildId=${guildId}`),
+    api(`/api/settings?guildId=${guildId}`)
+  ]);
+  renderCensor(words || []);
+  loadEscalation();
+  const am = s?.automod || {};
+  document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
+    if (am[inp.dataset.key]) { inp.value = 'true'; toggleAmCard(null, inp.dataset.key); }
+  });
+}
 
 async function saveAutomod() {
   const am = {};
-  document.querySelectorAll('.am-card input[data-key]').forEach(inp => {
-    am[inp.dataset.key] = inp.value === 'true';
-  });
+  document.querySelectorAll('.am-card input[data-key]').forEach(inp => { am[inp.dataset.key] = inp.value === 'true'; });
   const current = await api(`/api/settings?guildId=${guildId}`) || {};
-  const r = await apiPost('/api/settings',  { ...current, automod: am });
-  if (r?.success) toast('Auto-mod settings saved ✓');
-  else toast('Save failed', true);
+  const r = await apiPost('/api/settings', { ...current, automod: am });
+  r?.success ? toast('Auto-mod settings saved ✓') : toast('Save failed', true);
 }
 
 function renderCensor(words) {
-  const countEl = document.getElementById('censorCount');
-  if (countEl) countEl.textContent = `${words.length} active filter${words.length !== 1 ? 's' : ''}`;
   const tb = document.getElementById('cTbody');
   if (!words.length) { tb.innerHTML = `<tr><td colspan="4" class="empty">No censored words yet. Add one above.</td></tr>`; return; }
   tb.innerHTML = words.map(w => `
@@ -1880,7 +1469,7 @@ async function removeWord(word) {
 async function loadWarnings() {
   if (!guildId) { document.getElementById('wTbody').innerHTML = `<tr><td colspan="4" class="empty">Select a server first.</td></tr>`; return; }
   const data = await api(`/api/warnings?guildId=${guildId}`) || [];
-  const tb = document.getElementById('wTbody');
+  const tb   = document.getElementById('wTbody');
   if (!data.length) { tb.innerHTML = `<tr><td colspan="4" class="empty">No active warnings 🎉</td></tr>`; return; }
   const next = n => n <= 1 ? 'Warn' : n === 2 ? 'Mute 5m' : n === 3 ? 'Mute 10m' : 'Mute 2h';
   tb.innerHTML = data.map(w => `
@@ -1902,8 +1491,9 @@ async function clearWarn(userId) {
 // ═══════════════════════════════════════
 // REACTION BOARD
 // ═══════════════════════════════════════
-let boards       = [];
+let boards = [];
 let editingBoard = null;
+let selectedBoardChannels = [];
 
 async function loadReactionBoard() {
   if (!guildId) { document.getElementById('boardList').innerHTML = '<div class="empty">Select a server first.</div>'; return; }
@@ -1919,21 +1509,20 @@ function renderBoards() {
       <div class="be-icon">⭐</div>
       <p>No reaction boards yet.<br>Create one to start featuring messages.</p>
       <button class="btn btn-primary" onclick="openBoardModal()">+ New Board</button>
-    </div>`;
-    return;
+    </div>`; return;
   }
   el.innerHTML = boards.map((b, i) => `
     <div class="board-card">
-      <div class="board-emoji">${esc(b.emoji || '⭐')}</div>
+      <div class="board-emoji">${esc(b.emoji||'⭐')}</div>
       <div class="board-info">
-        <div class="board-name">${esc(b.name || 'Reaction Board')}</div>
+        <div class="board-name">${esc(b.name||'Reaction Board')}</div>
         <div class="board-meta">
-          <span>🎯 ${b.threshold || 5} reactions to feature</span>
-          <span>${b.updateCount !== false ? '🔄 Count updates' : '📌 Static count'}</span>
-          <span>${b.selfReact ? '👤 Self-react allowed' : '🚫 No self-react'}</span>
+          <span>🎯 ${b.threshold||5} reactions to feature</span>
+          <span>${b.updateCount!==false?'🔄 Count updates':'📌 Static count'}</span>
+          <span>${b.selfReact?'👤 Self-react allowed':'🚫 No self-react'}</span>
         </div>
         <div class="board-channels">
-          ${(b.channels || []).map(c => `<span class="board-channel-tag">#${esc(c)}</span>`).join('') || '<span style="font-size:12px;color:var(--text3)">No channels set</span>'}
+          ${(b.channels||[]).map(c=>`<span class="board-channel-tag">#${esc(c)}</span>`).join('')||'<span style="font-size:12px;color:var(--text3)">No channels set</span>'}
         </div>
       </div>
       <div class="board-actions">
@@ -1943,38 +1532,24 @@ function renderBoards() {
     </div>`).join('');
 }
 
-let selectedBoardChannels = [];
-
-function closeBoardModal() {
-  document.getElementById('boardModal').style.display = 'none';
-  editingBoard = null;
-  selectedBoardChannels = [];
-}
-
 async function openBoardModal(idx) {
   editingBoard = idx !== undefined ? idx : null;
   const b = idx !== undefined ? boards[idx] : null;
   document.getElementById('boardModalTitle').textContent = b ? 'Edit Board' : 'New Reaction Board';
-  document.getElementById('b_emoji').value     = b?.emoji     || '';
-  document.getElementById('b_name').value      = b?.name      || '';
+  document.getElementById('b_emoji').value     = b?.emoji || '';
+  document.getElementById('b_name').value      = b?.name  || '';
   document.getElementById('b_threshold').value = b?.threshold || 5;
   document.getElementById('boardEditId').textContent = b ? `Editing board #${idx+1}` : '';
   selectedBoardChannels = b?.channels ? [...b.channels] : [];
-
-  const setToggle = (key, val) => {
-    const el = document.querySelector(`#boardModal .toggle[data-key="${key}"]`);
-    if (el) el.dataset.on = String(val);
-  };
-  setToggle('b_selfReact',   b?.selfReact   ?? false);
-  setToggle('b_botReact',    b?.botReact    ?? true);
-  setToggle('b_updateCount', b?.updateCount ?? true);
-
+  const st = (key, val) => { const el = document.querySelector(`#boardModal .toggle[data-key="${key}"]`); if(el) el.dataset.on = String(val); };
+  st('b_selfReact', b?.selfReact??false);
+  st('b_botReact',  b?.botReact??true);
+  st('b_updateCount', b?.updateCount??true);
   document.getElementById('boardModal').style.display = 'block';
-
-  // Load channels
-  if (!guildId) return;
-  const channels = await api(`/api/channels?guildId=${guildId}`);
-  renderChannelPicker(channels || []);
+  if (guildId) {
+    const channels = await api(`/api/channels?guildId=${guildId}`);
+    renderChannelPicker(channels || []);
+  }
 }
 
 function renderChannelPicker(channels) {
@@ -1982,86 +1557,58 @@ function renderChannelPicker(channels) {
   if (!channels.length) { list.innerHTML = '<div class="empty" style="padding:12px">No channels found</div>'; return; }
   list.innerHTML = channels.map(c => {
     const sel = selectedBoardChannels.includes(c.name);
-    return `<div class="channel-opt ${sel?'selected':''}" onclick="toggleBoardChannel('${esc(c.name)}', this)">
-      <div class="ch-check"></div>
-      <span># ${esc(c.name)}</span>
-    </div>`;
+    return `<div class="channel-opt ${sel?'selected':''}" onclick="toggleBoardChannel('${esc(c.name)}',this)">
+      <div class="ch-check"></div><span># ${esc(c.name)}</span></div>`;
   }).join('');
   renderSelectedChannelTags();
 }
 
-
 function toggleBoardChannel(name, el) {
   const idx = selectedBoardChannels.indexOf(name);
-  if (idx === -1) selectedBoardChannels.push(name);
-  else selectedBoardChannels.splice(idx, 1);
+  idx === -1 ? selectedBoardChannels.push(name) : selectedBoardChannels.splice(idx, 1);
   el.classList.toggle('selected');
   renderSelectedChannelTags();
 }
 
 function renderSelectedChannelTags() {
-  document.getElementById('b_selectedChannels').innerHTML =
-    selectedBoardChannels.map(c => `
-      <span class="channel-tag">#${esc(c)}
-        <button type="button" onclick="removeBoardChannel('${esc(c)}');event.stopPropagation()">×</button>
-      </span>`).join('');
-  const label = document.getElementById('b_triggerLabel');
-  if (label) label.textContent = selectedBoardChannels.length
-    ? `${selectedBoardChannels.length} channel${selectedBoardChannels.length>1?'s':''} selected`
-    : 'Select channels…';
+  document.getElementById('b_selectedChannels').innerHTML = selectedBoardChannels.map(c =>
+    `<span class="channel-tag">#${esc(c)}<button type="button" onclick="removeBoardChannel('${esc(c)}');event.stopPropagation()">×</button></span>`).join('');
 }
 
 function removeBoardChannel(name) {
   selectedBoardChannels = selectedBoardChannels.filter(c => c !== name);
   document.querySelectorAll('#b_channelList .channel-opt').forEach(el => {
-    const span = el.querySelector('span');
-    if (span && span.textContent.replace('# ','').trim() === name) {
-      el.classList.remove('selected');
-    }
+    if (el.querySelector('span')?.textContent.replace('# ','').trim() === name) el.classList.remove('selected');
   });
   renderSelectedChannelTags();
+}
+
+function closeBoardModal() {
+  document.getElementById('boardModal').style.display = 'none';
+  editingBoard = null; selectedBoardChannels = [];
 }
 
 async function saveBoard() {
   const emoji     = document.getElementById('b_emoji').value.trim();
   const name      = document.getElementById('b_name').value.trim();
   const threshold = parseInt(document.getElementById('b_threshold').value) || 5;
-
   if (!emoji) { toast('Pick an emoji first', true); return; }
   if (!name)  { toast('Give the board a name', true); return; }
-
-  const getToggle = key => document.querySelector(`#boardModal .toggle[data-key="${key}"]`)?.dataset.on === 'true';
-
-  const board = {
-    emoji, name, threshold,
-    channels:    [...selectedBoardChannels],
-    selfReact:   getToggle('b_selfReact'),
-    botReact:    getToggle('b_botReact'),
-    updateCount: getToggle('b_updateCount'),
-  };
-
-  if (editingBoard !== null) boards[editingBoard] = board;
-  else boards.push(board);
-
+  const gt = key => document.querySelector(`#boardModal .toggle[data-key="${key}"]`)?.dataset.on === 'true';
+  const board = { emoji, name, threshold, channels:[...selectedBoardChannels], selfReact:gt('b_selfReact'), botReact:gt('b_botReact'), updateCount:gt('b_updateCount') };
+  if (editingBoard !== null) boards[editingBoard] = board; else boards.push(board);
   const current = await api(`/api/settings?guildId=${guildId}`) || {};
-  const r = await apiPost('/api/settings',  { ...current, reactionBoards: boards });
-  if (r?.success) {
-    toast(`Board "${name}" saved ✓`);
-    closeBoardModal();
-    renderBoards();
-  } else {
-    toast('Save failed', true);
-  }
+  const r = await apiPost('/api/settings', { ...current, reactionBoards: boards });
+  r?.success ? (toast(`Board "${name}" saved ✓`), closeBoardModal(), renderBoards()) : toast('Save failed', true);
 }
 
 async function deleteBoard(idx) {
   boards.splice(idx, 1);
   const current = await api(`/api/settings?guildId=${guildId}`) || {};
-  await apiPost('/api/settings',  { ...current, reactionBoards: boards });
+  await apiPost('/api/settings', { ...current, reactionBoards: boards });
   toast('Board deleted');
   renderBoards();
 }
-
 
 // ═══════════════════════════════════════
 // LEADERBOARD
@@ -2069,11 +1616,11 @@ async function deleteBoard(idx) {
 async function loadLeaderboard() {
   if (!guildId) { document.getElementById('lbTbody').innerHTML = `<tr><td colspan="5" class="empty">Select a server first.</td></tr>`; return; }
   const data = await api(`/api/leaderboard?guildId=${guildId}`) || [];
-  const tb = document.getElementById('lbTbody');
+  const tb   = document.getElementById('lbTbody');
   if (!data.length) { tb.innerHTML = `<tr><td colspan="5" class="empty">No XP data yet.</td></tr>`; return; }
   const maxXP = data[0]?.xp || 1;
   tb.innerHTML = data.map(e => {
-    const rc = e.rank===1?'rank-1':e.rank===2?'rank-2':e.rank===3?'rank-3':'';
+    const rc  = e.rank===1?'rank-1':e.rank===2?'rank-2':e.rank===3?'rank-3':'';
     const pct = Math.round((e.xp/maxXP)*100);
     return `<tr>
       <td class="${rc}">#${e.rank}</td>
@@ -2086,6 +1633,83 @@ async function loadLeaderboard() {
 }
 
 // ═══════════════════════════════════════
+// ESCALATION BUILDER
+// ═══════════════════════════════════════
+const DEFAULT_ESCALATION = [
+  { action:'warn', duration:null },
+  { action:'mute', duration:5   },
+  { action:'mute', duration:10  },
+  { action:'mute', duration:120 },
+];
+let escalationSteps = [];
+
+async function loadEscalation() {
+  const s = await api(`/api/settings?guildId=${guildId}`) || {};
+  escalationSteps = s.escalation ? JSON.parse(JSON.stringify(s.escalation)) : JSON.parse(JSON.stringify(DEFAULT_ESCALATION));
+  renderEscalation();
+}
+
+function renderEscalation() {
+  const container = document.getElementById('escalationSteps');
+  if (!container) return;
+  container.innerHTML = '';
+  escalationSteps.forEach((step, i) => {
+    const showDur = step.action === 'mute';
+    const durHTML = showDur
+      ? `<div class="step-dur"><input type="number" value="${step.duration||5}" min="1" style="width:60px" onchange="escalationSteps[${i}].duration=parseInt(this.value)||1"><span style="font-size:13px;color:var(--text2)">min</span></div>`
+      : `<span style="font-size:13px;color:var(--text3);font-style:italic">${step.action==='warn'?'Send warning':'Immediate'}</span>`;
+    const row = document.createElement('div');
+    row.className = 'escalation-step';
+    row.innerHTML = `
+      <div class="step-num">${i+1}</div>
+      <span class="step-label">Warning ${i+1}</span>
+      <select onchange="onEscalationChange(this,${i})">
+        <option value="warn" ${step.action==='warn'?'selected':''}>Warn</option>
+        <option value="mute" ${step.action==='mute'?'selected':''}>Mute</option>
+        <option value="kick" ${step.action==='kick'?'selected':''}>Kick</option>
+        <option value="ban"  ${step.action==='ban' ?'selected':''}>Ban</option>
+      </select>
+      ${durHTML}
+      ${i>=1?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeStep(${i})">Remove</button>`:'<span style="margin-left:auto"></span>'}`;
+    container.appendChild(row);
+    if (i < escalationSteps.length-1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'escalation-arrow'; arrow.textContent = '↓';
+      container.appendChild(arrow);
+    }
+  });
+  const btns = document.createElement('div');
+  btns.style.cssText = 'display:flex;gap:8px;margin-top:10px';
+  btns.innerHTML = `
+    <button class="btn btn-ghost btn-sm" onclick="addStep()">+ Add Step</button>
+    <button class="btn btn-primary btn-sm" onclick="saveEscalation()">Save Escalation</button>`;
+  container.appendChild(btns);
+}
+
+function onEscalationChange(sel, i) {
+  escalationSteps[i].action   = sel.value;
+  escalationSteps[i].duration = sel.value === 'mute' ? (escalationSteps[i].duration||5) : null;
+  renderEscalation();
+}
+
+function addStep() {
+  if (escalationSteps.length >= 8) { toast('Max 8 steps', true); return; }
+  escalationSteps.push({ action:'mute', duration:60 });
+  renderEscalation();
+}
+
+function removeStep(i) {
+  escalationSteps.splice(i, 1);
+  renderEscalation();
+}
+
+async function saveEscalation() {
+  const current = await api(`/api/settings?guildId=${guildId}`) || {};
+  const r = await apiPost('/api/settings', { ...current, escalation: escalationSteps });
+  r?.success ? toast('Escalation saved ✓') : toast('Save failed', true);
+}
+
+// ═══════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════
 async function loadSettings() {
@@ -2095,23 +1719,18 @@ async function loadSettings() {
   ]);
   const settings = s || {};
   const roleList = roles || [];
-
-  // Populate role dropdowns
-  const roleOptions = `<option value="">— None —</option>` +
+  const opts = `<option value="">— None —</option>` +
     roleList.map(r => `<option value="${esc(r.name)}">${esc(r.name)}</option>`).join('');
-
   const picRoleSel    = document.getElementById('s_picPermsRole');
   const exemptRoleSel = document.getElementById('s_picPermsExempt');
-  picRoleSel.innerHTML    = roleOptions;
-  exemptRoleSel.innerHTML = roleOptions;
-  picRoleSel.value    = settings.picPermsRole    || '';
-  exemptRoleSel.value = settings.picPermsExempt  || '';
-
-  document.getElementById('s_xpPerMessage').value   = settings.xpPerMessage    ?? 10;
-  document.getElementById('s_cooldownMs').value     = settings.cooldownMs      ?? 5000;
-  document.getElementById('s_spamLimit').value      = settings.spamLimit       ?? 5;
-  document.getElementById('s_escalationUser').value = settings.escalationUser  ?? '';
-  document.getElementById('s_skullThreshold').value = settings.skullThreshold  ?? 5;
+  picRoleSel.innerHTML = exemptRoleSel.innerHTML = opts;
+  picRoleSel.value    = settings.picPermsRole   || '';
+  exemptRoleSel.value = settings.picPermsExempt || '';
+  document.getElementById('s_xpPerMessage').value   = settings.xpPerMessage   ?? 10;
+  document.getElementById('s_cooldownMs').value     = settings.cooldownMs     ?? 5000;
+  document.getElementById('s_spamLimit').value      = settings.spamLimit      ?? 5;
+  document.getElementById('s_escalationUser').value = settings.escalationUser ?? '';
+  document.getElementById('s_skullThreshold').value = settings.skullThreshold ?? 5;
 }
 
 async function saveSettings() {
@@ -2124,47 +1743,18 @@ async function saveSettings() {
     escalationUser: document.getElementById('s_escalationUser').value.trim(),
     skullThreshold: parseInt(document.getElementById('s_skullThreshold').value),
   };
-  const r = await apiPost('/api/settings',  body);
-  if (r?.success) toast('Settings saved ✓');
-  else toast('Save failed', true);
+  const r = await apiPost('/api/settings', body);
+  r?.success ? toast('Settings saved ✓') : toast('Save failed', true);
 }
 
 // ═══════════════════════════════════════
 // COMMANDS PAGE
 // ═══════════════════════════════════════
 const DEFAULT_COMMANDS = {
-  'Config': {
-    'disable':'Disable a command in the current server or channel.','enable':'Enable a previously disabled command.',
-    'info':'Show information about the bot configuration.','list':'List all available commands.',
-    'permissions':'Manage command permissions for roles and channels.','ping':'Check the bot\'s response time.','config':'Configure bot settings for this server.',
-  },
+  'Config': { 'disable':'Disable a command in the current server or channel.','enable':'Enable a previously disabled command.','info':'Show information about the bot configuration.','list':'List all available commands.','permissions':'Manage command permissions for roles and channels.','ping':'Check the bot\'s response time.','config':'Configure bot settings for this server.' },
   'Auto Moderation': { 'automoderation':'Configure and manage auto-moderation rules.' },
-  'Information': {
-    'avatarinfo':'Display a user\'s avatar in full size.','bannerinfo':'Display a user\'s profile banner.',
-    'channelinfo':'Show detailed info about a channel.','emojiinfo':'Show details about a custom emoji.',
-    'guildbannerinfo':'Display the server\'s banner image.','guildchannelcount':'Show the total channel count.',
-    'guildiconinfo':'Display the server\'s icon in full size.','guildinfo':'Show detailed information about this server.',
-    'guildmembercount':'Show the current member count.','guildsplashinfo':'Display the server\'s invite splash image.',
-    'roleinfo':'Show details about a specific role.','userinfo':'Show detailed information about a user.',
-  },
-  'Moderation': {
-    'ban':'Ban a member from the server.','kick':'Kick a member from the server.',
-    'mute':'Timeout/mute a member.','unmute':'Remove a timeout from a member.',
-    'unban':'Unban a previously banned user.','warn':'Issue a warning to a member.',
-    'warns':'View warnings for a member.','unwarn':'Remove a warning from a member.',
-    'purge':'Bulk delete messages in a channel.','lock':'Lock a channel to prevent messages.',
-    'unlock':'Unlock a previously locked channel.','lockall':'Lock all channels in the server.',
-    'unlockall':'Unlock all channels in the server.','massban':'Ban multiple users at once.',
-    'masskick':'Kick multiple users at once.','massmute':'Mute multiple users at once.',
-    'masswarn':'Warn multiple users at once.','archive':'Archive a moderation case.',
-    'caselist':'List all moderation cases.','caseinfo':'Show details about a specific case.',
-    'caseupdate':'Update the reason for a case.','casedelete':'Delete a moderation case.',
-    'caseclose':'Close an open moderation case.','casesplit':'Split a case into multiple cases.',
-    'report':'Report a user to moderators.','timeban':'Ban a user for a specific duration.',
-    'timekick':'Kick a user after a time delay.','timemute':'Mute a user for a specific duration.',
-    'timewarn':'Warn a user after a time delay.','setslowmode':'Set slowmode for a channel.',
-    'usernotes':'Add or view notes on a user.',
-  },
+  'Information': { 'avatarinfo':'Display a user\'s avatar in full size.','bannerinfo':'Display a user\'s profile banner.','channelinfo':'Show detailed info about a channel.','emojiinfo':'Show details about a custom emoji.','guildbannerinfo':'Display the server\'s banner image.','guildchannelcount':'Show the total channel count.','guildiconinfo':'Display the server\'s icon in full size.','guildinfo':'Show detailed information about this server.','guildmembercount':'Show the current member count.','guildsplashinfo':'Display the server\'s invite splash image.','roleinfo':'Show details about a specific role.','userinfo':'Show detailed information about a user.' },
+  'Moderation': { 'ban':'Ban a member from the server.','kick':'Kick a member from the server.','mute':'Timeout/mute a member.','unmute':'Remove a timeout from a member.','unban':'Unban a previously banned user.','warn':'Issue a warning to a member.','warns':'View warnings for a member.','unwarn':'Remove a warning from a member.','purge':'Bulk delete messages in a channel.','lock':'Lock a channel to prevent messages.','unlock':'Unlock a previously locked channel.','lockall':'Lock all channels in the server.','unlockall':'Unlock all channels in the server.','massban':'Ban multiple users at once.','masskick':'Kick multiple users at once.','massmute':'Mute multiple users at once.','masswarn':'Warn multiple users at once.','caselist':'List all moderation cases.','caseinfo':'Show details about a specific case.','caseupdate':'Update the reason for a case.','casedelete':'Delete a moderation case.','report':'Report a user to moderators.','timeban':'Ban a user for a specific duration.','timemute':'Mute a user for a specific duration.','purge':'Bulk delete messages in a channel.' },
   'Messages': { 'sendmessage':'Send a message as the bot.','sendtemplate':'Send a saved message template.' },
   'Reaction Roles': { 'reactionroles':'Manage reaction role configurations.','reactionrolesconfig':'Configure settings for reaction roles.' },
   'Join Roles': { 'joinroles':'Manage roles automatically assigned on join.' },
@@ -2178,9 +1768,7 @@ function toggleDefaultCommands() {
   defaultOpen = !defaultOpen;
   document.getElementById('defaultCmdsBody').style.display = defaultOpen ? 'block' : 'none';
   document.getElementById('defaultCmdArrow').style.transform = defaultOpen ? 'rotate(180deg)' : '';
-  if (defaultOpen && !document.getElementById('defaultCmdList').innerHTML) {
-    renderDefaultCmds(DEFAULT_COMMANDS);
-  }
+  if (defaultOpen && !document.getElementById('defaultCmdList').innerHTML) renderDefaultCmds(DEFAULT_COMMANDS);
 }
 
 function renderDefaultCmds(groups) {
@@ -2190,11 +1778,9 @@ function renderDefaultCmds(groups) {
     const entries = Object.entries(cmds);
     total += entries.length;
     if (!entries.length) return `<div class="cmd-group"><div class="cmd-group-title">${esc(group)}</div><span style="font-size:13px;color:var(--text3)">No results</span></div>`;
-    const pills = entries.map(([name, desc]) => `
-      <span class="cmd-pill">${esc(name)}<span class="cmd-help">?</span>
-        <div class="cmd-tooltip"><strong>/${esc(name)}</strong><br>${esc(desc)}</div>
-      </span>`).join('');
-    return `<div class="cmd-group"><div class="cmd-group-title">${esc(group)}</div><div class="cmd-grid">${pills}</div></div>`;
+    return `<div class="cmd-group"><div class="cmd-group-title">${esc(group)}</div><div class="cmd-grid">
+      ${entries.map(([n, d]) => `<span class="cmd-pill">${esc(n)}<span class="cmd-help">?</span><div class="cmd-tooltip"><strong>/${esc(n)}</strong><br>${esc(d)}</div></span>`).join('')}
+    </div></div>`;
   }).join('');
   document.getElementById('cmdCount').textContent = `${total} commands`;
 }
@@ -2203,9 +1789,9 @@ function filterDefaultCmds() {
   const q = document.getElementById('cmdSearch').value.toLowerCase();
   if (!q) { renderDefaultCmds(DEFAULT_COMMANDS); return; }
   const filtered = {};
-  for (const [group, cmds] of Object.entries(DEFAULT_COMMANDS)) {
-    const matches = Object.fromEntries(Object.entries(cmds).filter(([n]) => n.includes(q)));
-    if (Object.keys(matches).length) filtered[group] = matches;
+  for (const [g, cmds] of Object.entries(DEFAULT_COMMANDS)) {
+    const m = Object.fromEntries(Object.entries(cmds).filter(([n]) => n.includes(q)));
+    if (Object.keys(m).length) filtered[g] = m;
   }
   renderDefaultCmds(Object.keys(filtered).length ? filtered : {'No results':{}});
 }
@@ -2215,9 +1801,9 @@ async function loadCommands() {
   const s = await api(`/api/settings?guildId=${guildId}`) || {};
   prefixes = s.prefixes || ['!'];
   renderPrefixes();
-  const cmds = s.commands || {};
+  const cmds     = s.commands || {};
   const defaults = { cmdNotFound:true, wrongUsage:true, noPermissions:true, disabledInChannel:false, onCooldown:true };
-  Object.entries({...defaults,...cmds}).forEach(([key,val]) => {
+  Object.entries({...defaults,...cmds}).forEach(([key, val]) => {
     const el = document.querySelector(`#page-commands .toggle[data-key="${key}"]`);
     if (el) el.dataset.on = String(val);
   });
@@ -2228,8 +1814,7 @@ function renderPrefixes() {
   if (!el) return;
   document.getElementById('prefixCount').textContent = `${prefixes.length}/5`;
   if (!prefixes.length) { el.innerHTML = '<span style="font-size:13px;color:var(--text3);font-style:italic">No prefixes set</span>'; return; }
-  el.innerHTML = prefixes.map((p,i) => `
-    <span class="prefix-tag">${esc(p)}<button onclick="removePrefix(${i})" title="Remove">🗑</button></span>`).join('');
+  el.innerHTML = prefixes.map((p,i) => `<span class="prefix-tag">${esc(p)}<button onclick="removePrefix(${i})" title="Remove">🗑</button></span>`).join('');
 }
 
 function openPrefixModal() {
@@ -2264,187 +1849,19 @@ async function savePrefixes() {
   await apiPost('/api/settings', { ...current, prefixes });
 }
 
-function flipToggle(el) {
-  el.dataset.on = String(el.dataset.on !== 'true');
-}
+function flipToggle(el) { el.dataset.on = String(el.dataset.on !== 'true'); }
 
 async function saveCommands() {
-  const toggles = document.querySelectorAll('#page-commands .toggle[data-key]');
   const cmds = {};
-  toggles.forEach(t => { cmds[t.dataset.key] = t.dataset.on === 'true'; });
+  document.querySelectorAll('#page-commands .toggle[data-key]').forEach(t => { cmds[t.dataset.key] = t.dataset.on === 'true'; });
   const current = await api(`/api/settings?guildId=${guildId}`) || {};
   const r = await apiPost('/api/settings', { ...current, commands: cmds });
-  if (r?.success) toast('Saved ✓');
-  else toast('Save failed', true);
-}
-
-
-// ═══════════════════════════════════════
-// ESCALATION BUILDER
-// ═══════════════════════════════════════
-const DEFAULT_ESCALATION = [
-  { action: 'warn', duration: null },
-  { action: 'mute', duration: 5   },
-  { action: 'mute', duration: 10  },
-  { action: 'mute', duration: 120 },
-];
-
-let escalationSteps = [];
-
-async function loadEscalation() {
-  const s = await api(`/api/settings?guildId=${guildId}`) || {};
-  escalationSteps = s.escalation ? JSON.parse(JSON.stringify(s.escalation)) : JSON.parse(JSON.stringify(DEFAULT_ESCALATION));
-  renderEscalation();
-}
-
-function renderEscalation() {
-  const container = document.getElementById('escalationSteps');
-  if (!container) return;
-  container.innerHTML = '';
-  escalationSteps.forEach((step, i) => {
-    const showDur = step.action === 'mute';
-    const durHTML = showDur ? `
-      <div class="step-dur">
-        <input type="number" value="${step.duration || 5}" min="1" style="width:60px"
-          onchange="escalationSteps[${i}].duration=parseInt(this.value)||1">
-        <span>min</span>
-      </div>` : `<span style="font-size:13px;color:var(--text3)">${step.action === 'warn' ? 'Send warning' : 'Immediate'}</span>`;
-
-    const row = document.createElement('div');
-    row.innerHTML = `<div class="escalation-step">
-      <div class="step-num">${i+1}</div>
-      <span class="step-label">Warning ${i+1}</span>
-      <select onchange="onEscalationChange(this,${i})">
-        <option value="warn" ${step.action==='warn'?'selected':''}>Warn</option>
-        <option value="mute" ${step.action==='mute'?'selected':''}>Mute</option>
-        <option value="kick" ${step.action==='kick'?'selected':''}>Kick</option>
-        <option value="ban"  ${step.action==='ban' ?'selected':''}>Ban</option>
-      </select>
-      ${durHTML}
-      ${i>=1?`<button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="removeStep(${i})">Remove</button>`:'<span style="margin-left:auto"></span>'}
-    </div>`;
-    container.appendChild(row.firstElementChild);
-    if (i < escalationSteps.length-1) {
-      const arrow = document.createElement('div');
-      arrow.className = 'escalation-arrow';
-      arrow.textContent = '↓';
-      container.appendChild(arrow);
-    }
-  });
-  const btns = document.createElement('div');
-  btns.style.cssText = 'display:flex;gap:8px;margin-top:10px';
-  btns.innerHTML = `
-    <button class="btn btn-ghost btn-sm" onclick="addStep()">+ Add Step</button>
-    <button class="btn btn-primary btn-sm" onclick="saveEscalation()">Save Escalation</button>`;
-  container.appendChild(btns);
-}
-
-function onEscalationChange(sel, i) {
-  escalationSteps[i].action = sel.value;
-  escalationSteps[i].duration = sel.value === 'mute' ? (escalationSteps[i].duration || 5) : null;
-  renderEscalation();
-}
-
-function addStep() {
-  if (escalationSteps.length >= 8) { toast('Max 8 steps', true); return; }
-  escalationSteps.push({ action: 'mute', duration: 60 });
-  renderEscalation();
-}
-
-function removeStep(i) {
-  escalationSteps.splice(i, 1);
-  renderEscalation();
-}
-
-async function saveEscalation() {
-  const current = await api(`/api/settings?guildId=${guildId}`) || {};
-  const r = await apiPost('/api/settings',  { ...current, escalation: escalationSteps });
-  if (r?.success) toast('Escalation saved ✓');
-  else toast('Save failed', true);
+  r?.success ? toast('Saved ✓') : toast('Save failed', true);
 }
 
 // ═══════════════════════════════════════
-// Inject condition editor into every am-card on page load
-function initConditionEditors() {
-  const configs = {
-    am_spam:        { label: 'messages in', unit: 'seconds' },
-    am_channelSpam: { label: 'channels in', unit: 'seconds' },
-    am_mentions:    { label: 'mentions in', unit: 'seconds' },
-    am_attachments: { label: 'attachments in', unit: 'seconds' },
-    am_emojis:      { label: 'emojis in', unit: 'seconds' },
-    am_messageLines:{ label: 'lines in', unit: 'seconds' },
-    am_caps:        { label: '% caps minimum', unit: '' },
-    am_words:       { label: 'matches in', unit: 'seconds' },
-    am_links:       { label: 'links in', unit: 'seconds' },
-    am_invites:     { label: 'invites in', unit: 'seconds' },
-    am_polls:       { label: 'polls in', unit: 'seconds' },
-  };
-
-  document.querySelectorAll('.am-card').forEach(card => {
-    const inp = card.querySelector('input[data-key]');
-    if (!inp) return;
-    const key = inp.dataset.key;
-    const cfg = configs[key] || { label: 'in', unit: 'seconds' };
-
-    const timeSelect = cfg.unit ? `
-      <input type="number" class="am-num-input" value="5" min="1" data-field="time"
-        oninput="updateCondLabel(this)">
-      <span>${cfg.unit}</span>` : '';
-
-    const ACTION_OPTS = [
-      'Delete message',
-      'Warn user',
-      'Mute user',
-      'Kick user',
-      'Ban user',
-      'Report to moderators',
-      'DM user',
-      'Open moderation case',
-      'Add reactions',
-      'Add roles',
-    ];
-
-    const condHTML = `
-      <div class="am-condition" style="display:none">
-        <div class="am-condition-header" onclick="toggleConditionBody(this)">
-          <span class="chevron">▾</span>
-          <span class="am-cond-label">≥ <span class="thresh-display">3</span> ${cfg.label}${cfg.unit ? ' <span class="time-display">5</span> ' + cfg.unit : ''}</span>
-          <button class="am-condition-remove" onclick="event.stopPropagation();toggleAmCard(this.closest('.am-card').querySelector('.am-actions button:last-child'), '${key}')" title="Remove condition">×</button>
-        </div>
-        <div class="am-condition-body">
-          <div class="am-threshold-row">
-            <span>≥</span>
-            <input type="number" class="am-num-input" value="3" min="1" max="100" data-field="threshold"
-              oninput="updateCondLabel(this)">
-            <span>${cfg.label}</span>
-            ${timeSelect}
-          </div>
-          <div class="am-actions-section">
-            <div class="am-actions-taken"></div>
-            <button class="add-action-btn" onclick="addAction(this, '${key}')">
-              + No actions added — click to add
-            </button>
-          </div>
-        </div>
-      </div>`;
-    card.insertAdjacentHTML('beforeend', condHTML);
-  });
-}
-
-function updateCondLabel(input) {
-  const body    = input.closest('.am-condition-body');
-  const header  = body.previousElementSibling;
-  const thresh  = body.querySelector('[data-field=threshold]')?.value || '3';
-  const timeEl  = body.querySelector('[data-field=time]');
-  const thDisp  = header.querySelector('.thresh-display');
-  const tmDisp  = header.querySelector('.time-display');
-  if (thDisp) thDisp.textContent = thresh;
-  if (tmDisp && timeEl) tmDisp.textContent = timeEl.value;
-}
-
-// Call on DOM ready
-document.addEventListener('DOMContentLoaded', initConditionEditors);
-
+// ROLE MODAL
+// ═══════════════════════════════════════
 let modalModule   = null;
 let allRoles      = [];
 let selectedRoles = [];
@@ -2457,13 +1874,10 @@ async function openRoleModal(moduleKey, title, desc) {
   document.getElementById('roleSearch').value       = '';
   document.getElementById('roleModal').style.display = 'block';
   document.getElementById('roleList').innerHTML = '<div class="loading" style="padding:24px">Loading roles</div>';
-
-  // Fetch roles and saved selections in parallel
   const [roles, savedData] = await Promise.all([
     api(`/api/roles?guildId=${guildId}`),
     api(`/api/automod-roles?guildId=${guildId}`)
   ]);
-
   allRoles      = roles || [];
   selectedRoles = (savedData && savedData[moduleKey]) ? [...savedData[moduleKey]] : [];
   renderRoleList(allRoles);
@@ -2473,15 +1887,14 @@ function renderRoleList(roles) {
   const list = document.getElementById('roleList');
   if (!roles.length) { list.innerHTML = '<div class="empty">No roles found</div>'; return; }
   list.innerHTML = roles.map(r => {
-    const isSelected = selectedRoles.includes(r.id);
-    const color = r.color || '#99aab5';
-    return `<div class="role-item ${isSelected ? 'selected' : ''}" onclick="toggleRole('${r.id}')">
-      <div class="role-dot" style="background:${color}"></div>
+    const isSel = selectedRoles.includes(r.id);
+    return `<div class="role-item ${isSel?'selected':''}" onclick="toggleRole('${r.id}')">
+      <div class="role-dot" style="background:${r.color||'#99aab5'}"></div>
       <span class="role-name">${esc(r.name)}</span>
       <div class="role-check"></div>
     </div>`;
   }).join('');
-  updateSelectedCount();
+  document.getElementById('selectedCount').textContent = `${selectedRoles.length} role${selectedRoles.length!==1?'s':''} selected`;
 }
 
 function filterRoles() {
@@ -2491,52 +1904,29 @@ function filterRoles() {
 
 function toggleRole(roleId) {
   const idx = selectedRoles.indexOf(roleId);
-  if (idx === -1) selectedRoles.push(roleId);
-  else selectedRoles.splice(idx, 1);
-  // Update UI without re-rendering everything
+  idx === -1 ? selectedRoles.push(roleId) : selectedRoles.splice(idx, 1);
   const q = document.getElementById('roleSearch').value.toLowerCase();
   renderRoleList(allRoles.filter(r => r.name.toLowerCase().includes(q)));
 }
 
-function updateSelectedCount() {
-  document.getElementById('selectedCount').textContent =
-    `${selectedRoles.length} role${selectedRoles.length !== 1 ? 's' : ''} selected`;
-}
-
 async function saveRoles() {
   if (!guildId || !modalModule) return;
-  const r = await api('/api/automod-roles', 'POST', {
-    guildId, module: modalModule, roles: selectedRoles
-  });
-  if (r?.success) {
-    toast(`Roles saved for ${document.getElementById('modalTitle').textContent} ✓`);
-    closeRoleModal();
-  } else {
-    toast('Save failed', true);
-  }
+  const r = await api('/api/automod-roles', 'POST', { guildId, module: modalModule, roles: selectedRoles });
+  r?.success ? (toast(`Roles saved ✓`), closeRoleModal()) : toast('Save failed', true);
 }
 
-function closeRoleModal(e) {
-  if (e && e.target !== document.querySelector('.modal-overlay')) return;
-  document.getElementById('roleModal').style.display = 'none';
-  modalModule = null;
-}
+function closeRoleModal() { document.getElementById('roleModal').style.display = 'none'; modalModule = null; }
 
 // ═══════════════════════════════════════
 // UTILS
 // ═══════════════════════════════════════
 async function api(url, method='GET', body=null) {
   try {
-    const r = await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-      ...(body ? { body: JSON.stringify(body) } : {})
-    });
+    const r = await fetch(url, { method, headers:{'Content-Type':'application/json'}, ...(body?{body:JSON.stringify(body)}:{}) });
     return await r.json();
   } catch { return null; }
 }
 
-// Settings POST always needs guildId as query param
 async function apiPost(url, body) {
   const sep = url.includes('?') ? '&' : '?';
   return api(`${url}${sep}guildId=${guildId}`, 'POST', body);
