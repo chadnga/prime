@@ -38,7 +38,6 @@ const REDIRECT_URI   = `https://prime-ed59.onrender.com/auth/callback`;
 const DISCORD_API    = 'https://discord.com/api/v10';
 
 // ── DB keys (must match index.js) ────────────────────────────────
-const CENSOR_KEY            = 'censored_words';
 const AUTO_MOD_WARN_PREFIX  = 'auto_mod_warn';
 const JOIN_LEAVE_STATS_PREFIX = 'join_leave_stats';
 
