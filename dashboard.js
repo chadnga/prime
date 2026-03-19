@@ -51,12 +51,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.set('trust proxy', 1);
 app.use(session({
   secret: process.env.DASHBOARD_SECRET || 'primelooks-dashboard-secret-change-me',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 } // 24 hours
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    secure: true,
+    sameSite: 'lax'
+  }
 }));
 
 // ── Auth guard middleware ────────────────────────────────────────
