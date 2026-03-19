@@ -697,7 +697,7 @@ client.on('messageCreate', async message => {
         const nextLvl    = currentLvl + 1;
         const nextLvlXP  = Math.pow(nextLvl / 0.1, 2);
         const xpNeeded   = Math.ceil(nextLvlXP - currentXP);
-        reply = ``;
+        reply = `Hey ${message.author}, you'll unlock **${topicStr}perms** when you hit **Level ${nextLvl}** — only **${xpNeeded} XP** away! Keep chatting 💀`;
       }
 
       await message.reply({ content: reply, allowedMentions: { repliedUser: true } });
