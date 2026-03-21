@@ -1159,7 +1159,7 @@ const PAGE_INFO = {
 
   try {
     const res = await fetch('/api/me');
-    if (!res.ok) { location.href = '/'; return; }
+    if (!res.ok) { location.href = '/auth/login'; return; }
     const { user, guilds } = await res.json();
 
     document.getElementById('uName').textContent      = user.username;
