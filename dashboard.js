@@ -22,8 +22,7 @@ function startBot() {
     env: process.env
   });
   bot.on('exit', (code) => {
-    console.log(`⚠️ Bot exited (${code}) — restarting in 3s...`);
-    setTimeout(startBot, 3000);
+    console.log(`⚠️ Bot exited (${code})`);
   });
 }
 startBot();
@@ -331,15 +330,18 @@ app.post('/api/warnings/clear', requireAuth, async (req, res) => {
 });
 
 // Catch-all → serve index.html
+app.get('/', (req, res) => {
+  res.redirect('/dashboard.html');
+});
 app.get('/*splat', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-module.exports = function startDashboard() {
-  app.listen(PORT, () => {
-    console.log(`🖥️  PrimeLooks Dashboard running at http://localhost:${PORT}`);
-    if (!CLIENT_ID || !CLIENT_SECRET) {
-      console.warn('⚠️  CLIENT_ID or CLIENT_SECRET missing from .env — OAuth login will not work');
-    }
-  });
-};
+app.listen(PORT, () => {
+  console.log(`🖥️  PrimeLooks Dashboard running at http://localhost:${PORT}`);
+  if (!CLIENT_ID || !CLIENT_SECRET) {
+    console.warn('⚠️  CLIENT_ID or CLIENT_SECRET missing from .env — OAuth login will not work');
+  }
+});
+
+module.exports = function startDashboard() {};
