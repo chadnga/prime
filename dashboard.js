@@ -56,9 +56,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24, // 24 hours
+    maxAge: 1000 * 60 * 60 * 24,
     secure: true,
-    sameSite: 'lax'
+    sameSite: 'none'
   }
 }));
 
@@ -112,7 +112,10 @@ app.get('/auth/callback', async (req, res) => {
     req.session.access_token = access_token;
     req.session.guilds       = guildsRes.data;
 
-    res.redirect('/dashboard.html');
+    req.session.save((err) => {
+      if (err) console.error('Session save error:', err);
+      res.redirect('/dashboard.html');
+    });
   } catch (err) {
     console.error('OAuth error:', err.response?.data || err.message);
     res.redirect('/?error=oauth_failed');
