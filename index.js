@@ -307,12 +307,6 @@ async function getLeaderboardEntries(guildId) {
 // =====================
 client.once('ready', () => {
   console.log(`✅ Bot online as ${client.user.tag}`);
-  try {
-    const startDashboard = require('./dashboard');
-    startDashboard(db, client);
-  } catch (err) {
-    logError('dashboard:start', err);
-  }
 });
 
 // =====================
