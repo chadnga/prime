@@ -13,16 +13,7 @@ const { spawn }   = require('child_process');
 require('dotenv').config();
 const { QuickDB } = require('quick.db');
 const db          = new QuickDB();
-app.use(session({
-  secret: process.env.DASHBOARD_SECRET || 'primelooks-dashboard-secret-change-me',
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    maxAge: 1000 * 60 * 60 * 24,
-    secure: true,
-    sameSite: 'none'
-  }
-}));
+
 // ── Start the bot as a child process ─────────────────────────────
 function startBot() {
   console.log('🤖 Starting bot (index.js)...');
