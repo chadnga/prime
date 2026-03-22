@@ -1,3 +1,4 @@
+
 console.log("Registering slash commands...");
 
 require('dotenv').config();

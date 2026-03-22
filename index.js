@@ -307,6 +307,12 @@ async function getLeaderboardEntries(guildId) {
 // =====================
 client.once('ready', () => {
   console.log(`✅ Bot online as ${client.user.tag}`);
+  try {
+    const startDashboard = require('./dashboard');
+    startDashboard(db, client);
+  } catch (err) {
+    logError('dashboard:start', err);
+  }
 });
 
 // =====================
@@ -691,7 +697,7 @@ client.on('messageCreate', async message => {
         const nextLvl    = currentLvl + 1;
         const nextLvlXP  = Math.pow(nextLvl / 0.1, 2);
         const xpNeeded   = Math.ceil(nextLvlXP - currentXP);
-        reply = `Hey ${message.author}, you'll unlock **${topicStr}perms** when you hit **Level ${nextLvl}** — only **${xpNeeded} XP** away! Keep chatting 💀`;
+        reply = ``;
       }
 
       await message.reply({ content: reply, allowedMentions: { repliedUser: true } });
