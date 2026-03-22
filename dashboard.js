@@ -13,15 +13,7 @@ const { spawn }   = require('child_process');
 require('dotenv').config();
 const { QuickDB } = require('quick.db');
 const db          = new QuickDB();
-// Session store using QuickDB
-const QuickDBStore = require('express-session').Store;
-class DBSessionStore extends QuickDBStore {
-  async get(sid, cb) { cb(null, await db.get(`sess_${sid}`) || null); }
-  async set(sid, sess, cb) { await db.set(`sess_${sid}`, sess); cb(null); }
-  async destroy(sid, cb) { await db.delete(`sess_${sid}`); cb(null); }
-}
 app.use(session({
-  store: new DBSessionStore(),
   secret: process.env.DASHBOARD_SECRET || 'primelooks-dashboard-secret-change-me',
   resave: false,
   saveUninitialized: false,
