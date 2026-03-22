@@ -30,6 +30,13 @@ startBot();
 const app  = express();
 const PORT = process.env.PORT || process.env.DASHBOARD_PORT || 3001;
 
+const QuickDBStore = require('express-session').Store;
+class DBSessionStore extends QuickDBStore {
+  async get(sid, cb) { cb(null, await db.get(`sess_${sid}`) || null); }
+  async set(sid, sess, cb) { await db.set(`sess_${sid}`, sess); cb(null); }
+  async destroy(sid, cb) { await db.delete(`sess_${sid}`); cb(null); }
+}
+
 // ── Discord OAuth2 ───────────────────────────────────────────────
 const CLIENT_ID      = process.env.CLIENT_ID;      // your bot's application ID
 const CLIENT_SECRET  = process.env.CLIENT_SECRET;  // from Discord Developer Portal
