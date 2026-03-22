@@ -59,6 +59,7 @@ app.use((req, res, next) => {
 
 app.set('trust proxy', 1);
 app.use(session({
+  store: new DBSessionStore(),
   secret: process.env.DASHBOARD_SECRET || 'primelooks-dashboard-secret-change-me',
   resave: false,
   saveUninitialized: false,
